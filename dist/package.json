@@ -1,6 +1,6 @@
 {
     "name": "coolqr",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "author": "nazmirket",
     "description": "This is a custom QR code generator.",
     "main": "dist/src/CoolQR.js",
