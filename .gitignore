@@ -4,7 +4,6 @@ tests
 .DS_Store
 build
 dev
-demo
 *.pxd
 
 # Nuxt dev/build outputs
