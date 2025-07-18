@@ -1,0 +1,8 @@
+logs
+node_modules
+tests
+.DS_Store
+build
+dev
+demo
+*.pxd

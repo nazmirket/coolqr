@@ -1,0 +1,14 @@
+{
+    "rootDir": "./",
+    "extends": "@tsconfig/node18/tsconfig.json",
+    "compilerOptions": {
+        "outDir": "dist",
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
+        "typeRoots": ["./node_modules/@types", "./index.d.ts"],
+        "lib": ["dom", "es6"],
+        "declaration": true
+    },
+    "include": ["./**/*.ts", "./**/*.js", "./**/*.json", "./**/*.d.ts"],
+    "exclude": ["node_modules", "demo", "tests"]
+}
