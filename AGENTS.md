@@ -40,6 +40,7 @@ run with Podman on this host. The image installs the demo's own lockfile before
 copying the workspace so local source dependencies cannot leak into the image:
 
 ```sh
+export PODMAN_COMPOSE_PROVIDER=/opt/homebrew/bin/podman-compose
 podman compose -f compose.yml config --quiet
 COOLQR_PORT=9492 podman compose -p coolqr-validation up -d --build
 curl --fail http://127.0.0.1:9492/
