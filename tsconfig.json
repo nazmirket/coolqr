@@ -1,14 +1,13 @@
 {
-	"rootDir": "./",
 	"extends": "@tsconfig/node18/tsconfig.json",
 	"compilerOptions": {
+		"rootDir": "src",
 		"outDir": "dist",
-		"resolveJsonModule": true,
 		"esModuleInterop": true,
-		"typeRoots": ["./node_modules/@types", "./index.d.ts"],
-		"lib": ["dom", "es6"],
-		"declaration": true
+		"lib": ["dom", "es2020"],
+		"moduleResolution": "node16",
+		"declaration": true,
+		"strict": true
 	},
-	"include": ["./**/*.ts", "./**/*.js", "./**/*.json", "./**/*.d.ts"],
-	"exclude": ["node_modules", "demo", "tests"]
+	"include": ["src/**/*.ts"]
 }

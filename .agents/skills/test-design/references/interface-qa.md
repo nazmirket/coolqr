@@ -28,6 +28,22 @@ or screen-reader acceptance. Match native apps to their platform test tools.
 
 ## Produce evidence that points to a fix
 
+For visual comparison, use a baseline tied to the agreed requirement or an
+inspected previous artifact. Keep browser/OS rendering, viewport, pixel ratio,
+fonts, data, theme and state comparable when they affect the result. Wait for
+meaningful readiness such as loaded fonts and settled data; arbitrary delays can
+hide a race. Mask only known nondeterministic regions with an explained reason,
+never the content under test. Inspect the actual difference before updating a
+snapshot or widening tolerance. A baseline refreshed from a broken layout merely
+records the regression.
+
+Pixel differences can locate a change; they do not decide whether it improves
+hierarchy or satisfies the brief. Check long content and an affected responsive
+state, and use `interface-design` for a craft judgment. Test motion separately
+through playback and interruption because stable screenshot tools often disable
+it. Automated accessibility tools identify a subset of detectable issues; pair
+their findings with the keyboard and relevant assistive-technology journey.
+
 Use the project's tests and actual browser tools. Capture assertions, errors and
 motion samples for relevant local scenarios. Use a focused project test or
 controlled service to inject races and observe backend persistence. Never fabricate

@@ -1,0 +1,10 @@
+{
+	"extends": "../tsconfig.json",
+	"compilerOptions": {
+		"allowJs": false,
+		"noEmit": true,
+		"rootDir": "..",
+		"skipLibCheck": false
+	},
+	"include": ["consumer.ts"]
+}

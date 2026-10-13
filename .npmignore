@@ -1,2 +1,5 @@
 demo
 tests
+src
+*.json
+*.js

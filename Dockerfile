@@ -2,15 +2,19 @@ FROM node:20-alpine AS build
 
 ENV PNPM_HOME=/pnpm
 ENV PATH=$PNPM_HOME:$PATH
-WORKDIR /app/demo
+WORKDIR /app
 
-RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
+RUN corepack enable && corepack prepare pnpm@10.33.0 --activate
 
-COPY demo/package.json demo/pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml tsconfig.json ./
 RUN pnpm install --frozen-lockfile
 
-COPY demo ./
-RUN ./node_modules/.bin/nuxt build
+COPY src ./src
+RUN pnpm build
+
+COPY demo ./demo
+RUN pnpm --dir demo install --frozen-lockfile
+RUN pnpm --dir demo build
 
 FROM node:20-alpine AS runtime
 

@@ -43,4 +43,4 @@ export default {
 	],
 	shapes: Shapes,
 	frames: Frames,
-}
+} as const

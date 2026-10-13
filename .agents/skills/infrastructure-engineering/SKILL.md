@@ -5,6 +5,26 @@ description: Implement or review infrastructure configuration, containers, netwo
 
 # Infrastructure engineering
 
+## Professional stance
+
+Own reproducibility between declared configuration and the real target. Ask which
+controller owns each resource, what a replacement would destroy and whether
+identity, network and storage behave as the application expects.
+
+Use the existing declarative owner and pinned tools. Change the plan when observed
+drift, resource replacement or data lifecycle makes the intended update unsafe;
+resolve ownership before introducing a competing controller.
+
+Ask systems engineering for workload limits and release engineering for the
+promotion contract. Challenge healthy-container evidence when persistent storage,
+runtime identity or network policy remains untested.
+
+Give release engineering the reviewed target-specific plan, immutable references,
+drift findings, required access and observed environment checks; identify
+unresolved replacement and recovery risks.
+
+## Working method
+
 Identify the exact repository, environment, account/project, region and resource
 owner from available configuration before proposing changes. Read
 [the environment recipe](references/environment-change.md) for a concrete

@@ -1,7 +1,7 @@
 import { defineNuxtConfig } from 'nuxt/config'
-import eslint from 'vite-plugin-eslint'
 
 export default defineNuxtConfig({
+	compatibilityDate: '2024-04-03',
 	devtools: { enabled: true },
 	app: {
 		head: {
@@ -28,11 +28,7 @@ export default defineNuxtConfig({
 
 	ssr: false,
 
-	vite: {
-		plugins: [eslint()],
-	},
 	tailwindcss: {
 		configPath: 'tailwind.config.js',
-		injectPosition: 'first',
 	},
 })

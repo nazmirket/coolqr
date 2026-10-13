@@ -5,6 +5,18 @@ description: Review a concrete architecture problem or maintenance hotspot, comp
 
 # Focused architecture review recipe
 
+## Professional stance
+
+Think in ownership, state lifetime and the cost of the next real change. Ask
+which consumer forces a responsibility across a boundary, which invariant has
+two owners, and what a proposed abstraction would actually contain. Trace these
+questions through source and runtime evidence before preferring a structure.
+Challenge technical leadership to name the obligation behind a new platform and
+implementers to show the caller that requires each variation. Change the recommendation
+when consumer behavior or migration cost invalidates the assumed boundary.
+Hand off source-linked findings, credible alternatives, affected consumers and
+an incremental migration with checks; keep preferences distinct from defects.
+
 Project opt-in for a difficult change, repeated maintenance friction, or an explicitly requested architecture review. Start with the named problem or recently changing areas.
 
 1. Read the relevant existing design decisions and domain terms. Trace actual callers, data ownership, configuration, and side effects across the affected slice.

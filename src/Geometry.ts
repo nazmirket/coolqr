@@ -4,7 +4,7 @@ export function degToRad(a: number) {
 	return (a / 180) * Math.PI
 }
 
-export function getCenter(shape: Konva.Shape) {
+export function getCenter(shape: Konva.Node) {
 	const angleRad = degToRad(shape.rotation() || 0)
 	return {
 		x:
@@ -18,7 +18,11 @@ export function getCenter(shape: Konva.Shape) {
 	}
 }
 
-export function rotateAroundPoint(shape: Konva.Shape, deltaDeg: number, point: any) {
+export function rotateAroundPoint(
+	shape: Konva.Node,
+	deltaDeg: number,
+	point: { x: number; y: number },
+) {
 	const angleRad = degToRad(deltaDeg)
 	const x = Math.round(
 		point.x +
@@ -38,12 +42,12 @@ export function rotateAroundPoint(shape: Konva.Shape, deltaDeg: number, point: a
 	shape.rotation(rotation)
 }
 
-export function rotateAroundCenter(shape: any, deltaDeg: number) {
+export function rotateAroundCenter(shape: Konva.Node, deltaDeg: number) {
 	const center = getCenter(shape)
 	rotateAroundPoint(shape, deltaDeg, center)
 }
 
-export function flip(shape: Konva.Shape, flip: 'h' | 'v' | undefined) {
+export function flip(shape: Konva.Node, flip: 'h' | 'v' | undefined) {
 	if (flip === 'h') {
 		shape.scaleX(-1)
 		shape.x(shape.x() + shape.width())

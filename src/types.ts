@@ -1,12 +1,4 @@
-export interface DrawOpts {
-	x: number
-	y: number
-	w: number
-	fill: Fill
-	flip?: 'h' | 'v' | undefined
-}
-
-type Shape =
+export type Shape =
 	| 'square'
 	| 'circle'
 	| 'diamond'
@@ -19,7 +11,7 @@ type Shape =
 	| 'hexagon'
 	| 'octagon'
 
-type Frame =
+export type Frame =
 	| 'square'
 	| 'circle'
 	| 'rounded'
@@ -30,13 +22,29 @@ type Frame =
 	| 'rounded6'
 	| 'squarecircle'
 
-export interface Fill {
-	type: 'solid' | 'gradient'
-	color: string
-	gradient: {
-		type: 'linear' | 'radial'
-		colors: string[]
-	}
+export interface Gradient {
+	type: 'linear' | 'radial'
+	colors: [string, string, ...string[]]
+}
+
+export type Fill =
+	| {
+			type: 'solid'
+			color: string
+			gradient?: never
+	  }
+	| {
+			type: 'gradient'
+			color: string
+			gradient: Gradient
+	  }
+
+export interface DrawOpts {
+	x: number
+	y: number
+	w: number
+	fill: Fill
+	flip?: 'h' | 'v'
 }
 
 export interface QROptions {

@@ -1,5 +1,6 @@
 import * as Geometry from './Geometry'
-import { DrawOpts, Fill } from '../index'
+import { fillShape } from './Fill'
+import { DrawOpts } from './types'
 
 import Konva from 'konva'
 
@@ -208,26 +209,4 @@ export default {
 
 		return group
 	},
-} as { [key: string]: (opts: DrawOpts) => Konva.Group }
-
-function fillShape(shape: Konva.Shape, f: Fill, w: number) {
-	try {
-		if (!f) return
-		if (f.type === 'solid') shape.fill(f.color as string)
-		//
-		else {
-			const { type, colors } = f.gradient as any
-			if (type === 'linear') {
-				shape.fillLinearGradientStartPoint({ x: 0, y: 0 })
-				shape.fillLinearGradientEndPoint({ x: w, y: w })
-				shape.fillLinearGradientColorStops([0, colors[0], 1, colors[1]])
-			} else if (type === 'radial') {
-				shape.fillRadialGradientStartPoint({ x: w / 2, y: w / 2 })
-				shape.fillRadialGradientEndPoint({ x: w / 2, y: w / 2 })
-				shape.fillRadialGradientStartRadius(0)
-				shape.fillRadialGradientEndRadius(w)
-				shape.fillRadialGradientColorStops([0, colors[0], 1, colors[1]])
-			}
-		}
-	} catch (error) {}
-}
+} as const satisfies Record<string, (opts: DrawOpts) => Konva.Group>

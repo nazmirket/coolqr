@@ -1,35 +1,31 @@
-# CoolQR Library
+# CoolQR
 
-The CoolQR Library is a TypeScript module that provides an easy way to generate QR codes with customizable shapes and fills. It includes several interfaces and types for customizing the QR code's size, background color, and shape and fill options for the eyes and dots.
+CoolQR is a browser-side TypeScript library for rendering customizable QR codes with
+Konva. It supports styled finder eyes, multiple dot shapes, solid or gradient fills,
+and optional center images. Use it in browser applications or browser-targeted
+bundles; Node canvas rendering is outside the supported runtime.
 
 ![Demo](https://i.imgur.com/QQiLsIy.png)
 
-[Live Demo](https://qr.mirket.dev/)
+[Live demo](https://qr.mirket.dev/)
 
 ## Installation
 
-To install the CoolQR Library, run the following command:
-
-```
+```bash
 npm install coolqr
 ```
 
 ## Usage
 
-To use the CoolQR Library, import the `CoolQR` function and call it with the desired data, container element, and options:
-
 ```typescript
-import CoolQR from 'coolqr'
-
-const data = 'https://example.com'
-const container = document.getElementById('qr-container') as HTMLDivElement
+import CoolQR, { type QROptions } from 'coolqr'
 
 const options = {
-	size: 200,
+	size: 512,
 	background: {
 		fill: {
 			type: 'solid',
-			color: '#FFFFFF',
+			color: '#ffffff',
 		},
 	},
 	eyes: {
@@ -37,14 +33,14 @@ const options = {
 			shape: 'rounded',
 			fill: {
 				type: 'solid',
-				color: '#000000',
+				color: '#111827',
 			},
 		},
 		inner: {
 			shape: 'circle',
 			fill: {
 				type: 'solid',
-				color: '#000000',
+				color: '#111827',
 			},
 		},
 	},
@@ -52,73 +48,128 @@ const options = {
 		shape: 'diamond',
 		fill: {
 			type: 'gradient',
-			color: '#000000',
+			color: '#111827',
 			gradient: {
 				type: 'linear',
-				colors: ['#FF0000', '#00FF00'],
+				colors: ['#ef4444', '#2563eb'],
 			},
 		},
 	},
 	image: {
-		src: 'https://example.com/logo.png',
-		margin: 10,
+		src: '/logo.png',
+		margin: 12,
 		hideDots: true,
 	},
-}
+} satisfies QROptions
 
-const stage = await CoolQR.draw(data, container, options)
+const container = document.getElementById('qr-container') as HTMLDivElement
+const stage = await CoolQR.draw('https://example.com', container, options)
 ```
 
-This will generate a QR code with the specified data and options and render it in the provided container element.
+`size` is the exact width and height of the generated canvas in pixels. All modules
+and decorative geometry scale proportionally. When an optional image cannot load,
+CoolQR renders the QR code without the image and keeps the underlying dots visible.
+
+Destroy a stage when replacing it or unmounting its container:
+
+```typescript
+stage.destroy()
+```
 
 ## API
 
-### `CoolQR.draw(data: string, container: HTMLDivElement, options: QROptions): Promise<Konva.Stage>`
+### `CoolQR.draw(data, container, options)`
 
-Generates a QR code with the specified data and options and renders it in the provided container.
+Renders the supplied data and resolves with a `Konva.Stage`.
 
-- `data`: The data to encode in the QR code.
-- `container`: The HTML div element where the QR code will be rendered.
-- `options`: The options for generating the QR code.
+- `data`: String encoded into the QR code.
+- `container`: Browser `HTMLDivElement` that owns the stage.
+- `options`: A `QROptions` object.
 
-Returns a Promise that resolves to a Konva.Stage object.
+The named `draw` export is also available.
 
 ### `QROptions`
 
-The options for generating a QR code.
-
-- `size`: The size of the QR code in pixels.
-- `background`: The background options for the QR code.
-  - `fill`: The fill options for the background. See `Fill` interface for details.
-- `eyes`: The shape and fill options for the eyes of the QR code.
-  - `outer`: The shape and fill options for the outer eye frame.
-    - `shape`: The shape of the outer eye frame. Can be `'square'`, `'circle'`, `'rounded'`, `'rounded2'`, `'rounded3'`, `'rounded4'`, `'rounded5'`, `'rounded6'`, or `'squarecircle'`.
-    - `fill`: The fill options for the outer eye. See `Fill` interface for details.
-  - `inner`: The shape and fill options for the inner eye.
-    - `shape`: The shape of the inner eye. Can be `'square'`, `'circle'`, `'diamond'`, `'rounded'`, `'rounded2'`, `'rounded3'`, `'rounded4'`, `'sun'`, `'cross'`, `'hexagon'`, or `'octagon'`.
-    - `fill`: The fill options for the inner eye. See `Fill` interface for details.
-- `dots`: The shape and fill options for the dots of the QR code.
-  - `shape`: The shape of the dots. Can be `'square'`, `'circle'`, `'diamond'`, `'rounded'`, `'rounded2'`, `'rounded3'`, `'rounded4'`, `'sun'`, `'cross'`, `'hexagon'`, or `'octagon'`.
-  - `fill`: The fill options for the dots. See `Fill` interface for details.
-- `image` (optional): The image to overlay on the QR code.
-  - `src`: The source URL of the image.
-  - `margin`: The margin around the image in pixels.
-  - `hideDots` (optional): Whether to hide dots behind the image. Default: `false`.
+- `size`: Positive output width and height in pixels.
+- `background.fill`: Canvas fill.
+- `eyes.outer.shape`: `square`, `circle`, `rounded`, `rounded2`, `rounded3`,
+  `rounded4`, `rounded5`, `rounded6`, or `squarecircle`.
+- `eyes.inner.shape` and `dots.shape`: `square`, `circle`, `diamond`, `rounded`,
+  `rounded2`, `rounded3`, `rounded4`, `sun`, `cross`, `hexagon`, or `octagon`.
+- `image.src`: Optional same-origin or CORS-enabled image URL.
+- `image.margin`: Non-negative image inset in pixels.
+- `image.hideDots`: Removes covered modules only after the image loads successfully.
 
 ### `Fill`
 
-The fill options for a shape.
+Solid fill:
 
-- `type`: The type of the fill. Can be `'solid'` or `'gradient'`.
-- `color`: The color of the fill (used for solid fills and as fallback for gradients).
-- `gradient`: The gradient options for the fill (used when type is `'gradient'`).
-  - `type`: The type of the gradient. Can be `'linear'` or `'radial'`.
-  - `colors`: An array of colors for the gradient stops.
+```typescript
+const fill = {
+	type: 'solid',
+	color: '#111827',
+} satisfies Fill
+```
 
-## Live Demo
+Gradient fill:
 
-You can try out the CoolQR Library with this live demo: [https://qr.mirket.dev/](https://qr.mirket.dev)
+```typescript
+const fill = {
+	type: 'gradient',
+	color: '#111827',
+	gradient: {
+		type: 'radial',
+		colors: ['#f43f5e', '#8b5cf6', '#2563eb'],
+	},
+} satisfies Fill
+```
 
-## Author
+Gradient colors are distributed evenly and require at least two entries. `color`
+remains the fallback color for consumers that transform options before rendering.
 
-- Instagram [@codemirket](https://instagram.com/codemirket)
+## Development
+
+```bash
+pnpm install
+pnpm verify
+
+cd demo
+pnpm install
+pnpm verify
+```
+
+`pnpm verify` runs linting, runtime tests, consumer declaration tests, and builds.
+
+## Docker Deployment
+
+The production demo runs as an unprivileged, read-only container. Compose binds the
+application only to loopback on port `9491`, allowing the host's Nginx service to
+continue handling TLS.
+
+```bash
+docker compose build
+docker compose up -d
+docker compose ps
+curl --fail http://127.0.0.1:9491/
+```
+
+Use `COOLQR_PORT` to select a different loopback port for validation:
+
+```bash
+COOLQR_PORT=9492 docker compose -p coolqr-staging up -d --build
+```
+
+## Release
+
+```bash
+pnpm verify
+npm pack --dry-run
+npm run release
+```
+
+`prepack` always rebuilds the package, and `prepublishOnly` runs the full verification
+suite without recursively invoking `npm publish`.
+
+## License
+
+ISC

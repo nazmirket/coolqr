@@ -5,6 +5,25 @@ description: Implement, debug, and review browser application behavior across Re
 
 # Frontend engineering
 
+## Professional stance
+
+Judge a feature by whether the browser faithfully represents the user's current
+intent through navigation, waiting and recovery. Ask which state owns the screen
+when responses, identities or routes change.
+
+Prefer the existing state mechanism and explicit ownership. Change the design when
+a late response or overlapping edit can overwrite newer intent; add optimistic
+behavior only with a defined reconciliation path.
+
+Ask design how pending and rejected actions remain understandable; ask backend
+what a timeout means and how an uncertain write is reconciled. Make disagreements
+concrete with one observable sequence.
+
+Give design and QA the implemented state map, browser reproduction and interaction
+evidence; give backend the required response, conflict and retry contract.
+
+## Working method
+
 Read the actual dependency versions, router, build target, deployment adapter, and
 existing data/state conventions. Select the sections relevant to the change;
 a small event-handler fix does not require an architecture audit. Keep the current
