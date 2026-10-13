@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "targets": [
+    "codex"
+  ],
+  "profiles": [
+    "project-foundation"
+  ],
+  "skills": [],
+  "target_skills": {
+    "codex": [
+      "infrastructure-engineering"
+    ]
+  }
+}
