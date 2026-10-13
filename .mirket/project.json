@@ -1,13 +1,18 @@
 {
   "schema_version": 1,
   "targets": [
-    "codex"
+    "codex",
+    "claude"
   ],
   "profiles": [
     "project-foundation"
   ],
   "skills": [],
   "target_skills": {
+    "claude": [
+      "infrastructure-engineering",
+      "frontend-engineering"
+    ],
     "codex": [
       "infrastructure-engineering",
       "frontend-engineering"
