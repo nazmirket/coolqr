@@ -9,7 +9,8 @@
   "skills": [],
   "target_skills": {
     "codex": [
-      "infrastructure-engineering"
+      "infrastructure-engineering",
+      "frontend-engineering"
     ]
   }
 }

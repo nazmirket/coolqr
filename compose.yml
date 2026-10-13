@@ -1,0 +1,37 @@
+name: coolqr
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: coolqr-demo:${COOLQR_IMAGE_TAG:-local}
+    restart: unless-stopped
+    init: true
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp
+    ports:
+      - '127.0.0.1:${COOLQR_PORT:-9491}:3000'
+    environment:
+      HOST: 0.0.0.0
+      NODE_ENV: production
+      PORT: 3000
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --quiet
+        - --spider
+        - http://127.0.0.1:3000/
+      interval: 15s
+      timeout: 5s
+      start_period: 20s
+      retries: 4
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'

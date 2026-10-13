@@ -3,8 +3,9 @@
 This repository uses the Mirket harness. `.mirket/project.json` is the source
 of truth for the Codex target and selected expertise; `.agents/skills/` contains
 the generated, integrity checked project copies. The repository currently uses
-the `project-foundation` baseline plus `infrastructure-engineering` for its
-TypeScript package, Nuxt demo and Compose workflow.
+the `project-foundation` baseline plus `infrastructure-engineering` and
+`frontend-engineering` for its TypeScript package, Nuxt demo and Compose
+workflow.
 
 Maintain the setup through the supported commands from the repository root:
 

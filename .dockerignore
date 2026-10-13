@@ -1,0 +1,9 @@
+node_modules
+demo/node_modules
+demo/.nuxt
+demo/.output
+.git
+.mirket
+.agents
+dist
+*.tgz

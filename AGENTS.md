@@ -26,18 +26,18 @@ secrets out of the repository.
 
 ## Verification
 
-Use the pinned pnpm version from `package.json` and run the narrowest applicable
-checks, followed by the full package and demo gates when either changes:
+The committed baseline uses pnpm 9-compatible lockfiles. Use the explicit
+Corepack version below when validating this revision and run the package build
+before the container gate:
 
 ```sh
-pnpm install --frozen-lockfile
-pnpm verify
-pnpm --dir demo install --frozen-lockfile
-pnpm --dir demo verify
+corepack pnpm@9.15.9 install --frozen-lockfile --ignore-scripts
+corepack pnpm@9.15.9 run build
 ```
 
-The demo container uses the standard Compose format and is run with Podman on
-this host:
+The committed demo workspace is built by the standard Compose workflow and is
+run with Podman on this host. The image installs the demo's own lockfile before
+copying the workspace so local source dependencies cannot leak into the image:
 
 ```sh
 podman compose -f compose.yml config --quiet
