@@ -1,10 +1,10 @@
-FROM node:20-alpine AS build
+FROM node:24-alpine AS build
 
 ENV PNPM_HOME=/pnpm
 ENV PATH=$PNPM_HOME:$PATH
 WORKDIR /app
 
-RUN corepack enable && corepack prepare pnpm@10.33.0 --activate
+RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
 
 COPY package.json pnpm-lock.yaml tsconfig.json ./
 RUN pnpm install --frozen-lockfile
@@ -16,7 +16,7 @@ COPY demo ./demo
 RUN pnpm --dir demo install --frozen-lockfile
 RUN pnpm --dir demo build
 
-FROM node:20-alpine AS runtime
+FROM node:24-alpine AS runtime
 
 ENV HOST=0.0.0.0
 ENV NODE_ENV=production

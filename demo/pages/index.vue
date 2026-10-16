@@ -154,6 +154,9 @@
 					>
 						Download PNG
 					</button>
+					<p v-if="copyError" class="col-span-2 text-sm text-red-700" role="alert">
+						{{ copyError }}
+					</p>
 				</div>
 			</div>
 
@@ -165,6 +168,9 @@
 					:src="preview"
 					alt="Generated CoolQR preview"
 				/>
+				<p v-else-if="renderError" class="text-red-700" role="alert">
+					{{ renderError }}
+				</p>
 				<p v-else class="text-slate-500">Generating preview…</p>
 			</div>
 		</section>
@@ -176,7 +182,9 @@ import CoolQR, { type Frame, type QROptions, type Shape } from 'coolqr'
 
 const data = ref('https://example.com')
 const preview = ref('')
+const renderError = ref('')
 const copied = ref(false)
+const copyError = ref('')
 const previewContainer = ref<HTMLDivElement | null>(null)
 const renderedStage = ref<Awaited<ReturnType<typeof CoolQR.draw>>>()
 
@@ -222,10 +230,20 @@ async function render() {
 	renderedStage.value?.destroy()
 	renderedStage.value = undefined
 	preview.value = ''
+	renderError.value = ''
 	await nextTick()
 	if (!previewContainer.value) return
 
-	const stage = await CoolQR.draw(data.value, previewContainer.value, options.value)
+	let stage: Awaited<ReturnType<typeof CoolQR.draw>>
+	try {
+		stage = await CoolQR.draw(data.value, previewContainer.value, options.value)
+	} catch (error) {
+		if (sequence === renderSequence) {
+			renderError.value =
+				error instanceof Error ? error.message : 'Unable to generate a QR code.'
+		}
+		return
+	}
 	if (sequence !== renderSequence) {
 		stage.destroy()
 		return
@@ -237,13 +255,24 @@ async function render() {
 
 onMounted(() => void render())
 watch([data, options], () => void render(), { deep: true })
+onBeforeUnmount(() => {
+	renderSequence++
+	renderedStage.value?.destroy()
+	renderedStage.value = undefined
+})
 
 async function copyOptions() {
-	await navigator.clipboard.writeText(JSON.stringify(options.value))
-	copied.value = true
-	setTimeout(() => {
+	try {
+		await navigator.clipboard.writeText(JSON.stringify(options.value))
+		copyError.value = ''
+		copied.value = true
+		setTimeout(() => {
+			copied.value = false
+		}, 1000)
+	} catch {
 		copied.value = false
-	}, 1000)
+		copyError.value = 'Clipboard access is unavailable. Check browser permissions and try again.'
+	}
 }
 
 function download() {

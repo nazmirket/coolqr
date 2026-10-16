@@ -36,8 +36,10 @@ module.exports = {
 		{
 			files: ['tests/*.cjs'],
 			rules: {
+				'@typescript-eslint/no-require-imports': 'off',
 				'@typescript-eslint/no-var-requires': 'off',
 				'n/no-missing-require': 'off',
+				'n/no-unsupported-features/node-builtins': 'off',
 			},
 		},
 	],
