@@ -7,7 +7,9 @@
   "profiles": [
     "project-foundation"
   ],
-  "skills": [],
+  "skills": [
+    "search-visibility"
+  ],
   "target_skills": {
     "claude": [
       "infrastructure-engineering",

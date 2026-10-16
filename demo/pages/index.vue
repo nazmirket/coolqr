@@ -217,7 +217,11 @@
 </template>
 
 <script setup lang="ts">
-import CoolQR, { type Frame, type QROptions, type Shape } from 'coolqr'
+import type { Frame, QROptions, Shape } from 'coolqr'
+
+type CoolQRModule = typeof import('coolqr').default
+
+let coolQR: CoolQRModule | undefined
 
 const data = ref('https://example.com')
 const preview = ref('')
@@ -225,7 +229,7 @@ const renderError = ref('')
 const copied = ref(false)
 const copyError = ref('')
 const previewContainer = ref<HTMLDivElement | null>(null)
-const renderedStage = ref<Awaited<ReturnType<typeof CoolQR.draw>>>()
+const renderedStage = ref<Awaited<ReturnType<CoolQRModule['draw']>>>()
 
 const outerFrames: Frame[] = ['square', 'circle', 'rounded', 'rounded2', 'rounded3', 'rounded4', 'rounded5', 'rounded6', 'squarecircle']
 const shapes: Shape[] = ['square', 'circle', 'diamond', 'rounded', 'rounded2', 'rounded3', 'rounded4', 'sun', 'cross', 'hexagon', 'octagon']
@@ -242,6 +246,11 @@ const options = ref<QROptions>({
 
 let renderSequence = 0
 
+async function getCoolQR() {
+	if (!coolQR) coolQR = (await import('coolqr')).default
+	return coolQR
+}
+
 async function render() {
 	const sequence = ++renderSequence
 	renderedStage.value?.destroy()
@@ -251,9 +260,9 @@ async function render() {
 	await nextTick()
 	if (!previewContainer.value) return
 
-	let stage: Awaited<ReturnType<typeof CoolQR.draw>>
+	let stage: Awaited<ReturnType<CoolQRModule['draw']>>
 	try {
-		stage = await CoolQR.draw(data.value, previewContainer.value, options.value)
+		stage = await (await getCoolQR()).draw(data.value, previewContainer.value, options.value)
 	} catch (error) {
 		if (sequence === renderSequence) renderError.value = error instanceof Error ? error.message : 'Unable to generate a QR code.'
 		return
