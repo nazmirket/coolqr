@@ -58,3 +58,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
+
+## thedaviddias/Front-End-Checklist
+
+Source: https://github.com/thedaviddias/Front-End-Checklist/tree/e8d14d049010e2ce25afcd5e8609dfcbbe63e47e
+
+Conceptual selection of applicable public-page QA categories only; no upstream checklist text, rules, scripts or assets are redistributed. See docs/source-review.md.

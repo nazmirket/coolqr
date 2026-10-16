@@ -26,6 +26,24 @@ real long content, keyboard visibility, text enlargement and reduced motion.
 A narrow desktop browser is useful layout evidence, not physical touch/safe-area
 or screen-reader acceptance. Match native apps to their platform test tools.
 
+## Check the public page as delivered
+
+For a changed public page or launch review, open the built route by its real URL,
+including direct entry and relevant error/fallback routes. Check the affected
+document title, description, canonical and share metadata against the project's
+content and search requirements; inspect the rendered share preview when it is
+part of the deliverable. Verify real links and actions, critical image/font/media
+loading, reserved media space and readable fallback content at target widths.
+Exercise the locales and browser/device support named by the project. Measure
+loading or layout-shift claims on a representative build rather than accepting
+fixed third-party size or time thresholds as universal launch gates.
+
+The [pinned Front-End Checklist](https://github.com/thedaviddias/Front-End-Checklist/tree/e8d14d049010e2ce25afcd5e8609dfcbbe63e47e)
+can help locate a relevant HTML, CSS, JavaScript, media, accessibility, SEO or
+performance category. Select checks from the changed page and its actual
+requirements; do not treat every item or priority label as applicable. Use the
+project's authoritative standards and current platform documentation for details.
+
 ## Produce evidence that points to a fix
 
 For visual comparison, use a baseline tied to the agreed requirement or an
