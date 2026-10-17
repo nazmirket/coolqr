@@ -1,174 +1,161 @@
 # CoolQR
 
-CoolQR is a browser-side TypeScript library for rendering customizable QR codes with
-Konva. It supports styled finder eyes, multiple dot shapes, solid or gradient fills,
-and optional center images. Use it in browser applications or browser-targeted
-bundles; Node canvas rendering is outside the supported runtime.
+Create QR codes in your browser, or encode their module matrix in Node.js. CoolQR 3 has no runtime dependencies. Its QR Code Model 2 encoder and Canvas 2D renderer are written in this package.
 
-![Demo](https://i.imgur.com/QQiLsIy.png)
+**[Open the QR builder](https://qr.mirket.dev/)** · [View the source](https://github.com/nazmirket/coolqr)
 
-[Live demo](https://qr.mirket.dev/)
+## Use the builder
 
-## Installation
+1. Enter a URL, message, or other text. Try one of the example buttons to see a finished code immediately.
+2. Choose dark ink on a light background and, if you like, a data dot and corner style.
+3. Optionally upload a PNG, JPEG, WebP, or SVG logo. The logo is placed over data modules with high error correction; the builder does not upload the image.
+4. Download the 512 × 512 PNG. Scan the exported image at the size and on the material where it will appear.
 
-```bash
+The builder runs QR generation in your browser. Its preview and logo stay on your device. The page makes ordinary requests to load the site itself; this is not a promise of offline operation. A QR code shares whatever text you put in it with anyone who scans it, so review its contents before publishing.
+
+### Good results
+
+- Use a short, stable URL for public links. Long content requires a denser code.
+- Keep all four sides of the light margin visible. CoolQR reserves the QR standard's four-module quiet zone.
+- Use a high-contrast, dark foreground and light background. The renderer requires at least a 4.5:1 contrast ratio.
+- Prefer a simple, small logo. Decorative dots and logos can make a code harder to scan on low-quality screens or print.
+- Test the downloaded file with more than one camera or scanner before printing in volume.
+
+## Install the library
+
+```sh
 npm install coolqr
 ```
 
-## Usage
+CoolQR 3 is a breaking change from the previous `CoolQR.draw`/Konva API. Use the named `encodeQR` and `renderQR` functions below. The package entry point is CommonJS with TypeScript declarations; bundlers can consume it in browser applications. `encodeQR` works in Node.js. `renderQR` needs a browser with Canvas 2D.
 
-```typescript
-import CoolQR, { type QROptions } from 'coolqr'
+### Render and download a PNG
 
-const options = {
-	size: 512,
-	background: {
-		fill: {
-			type: 'solid',
-			color: '#ffffff',
-		},
-	},
-	eyes: {
-		outer: {
-			shape: 'rounded',
-			fill: {
-				type: 'solid',
-				color: '#111827',
-			},
-		},
-		inner: {
-			shape: 'circle',
-			fill: {
-				type: 'solid',
-				color: '#111827',
-			},
-		},
-	},
-	dots: {
-		shape: 'diamond',
-		fill: {
-			type: 'gradient',
-			color: '#111827',
-			gradient: {
-				type: 'linear',
-				colors: ['#ef4444', '#2563eb'],
-			},
-		},
-	},
-	image: {
-		src: '/logo.png',
-		margin: 12,
-		hideDots: true,
-	},
-} satisfies QROptions
+```ts
+import { renderQR } from 'coolqr'
 
-const container = document.getElementById('qr-container') as HTMLDivElement
-const stage = await CoolQR.draw('https://example.com', container, options)
+const canvas = await renderQR('https://example.com/portfolio', {
+  size: 512,
+  foreground: '#18212b',
+  background: '#ffffff',
+  dotStyle: 'rounded',
+  finderStyle: 'rounded',
+})
+
+document.querySelector('#result')?.replaceChildren(canvas)
+
+const link = document.createElement('a')
+link.href = canvas.toDataURL('image/png')
+link.download = 'portfolio-qr.png'
+link.click()
 ```
 
-`size` is the exact width and height of the generated canvas in pixels. All modules
-and decorative geometry scale proportionally. When an optional image cannot load,
-CoolQR renders the QR code without the image and keeps the underlying dots visible.
+`renderQR` returns a new `HTMLCanvasElement`. Your application owns it and can append, replace, remove, or export it. The canvas size is the exact output width and height, including the quiet zone.
 
-Destroy a stage when replacing it or unmounting its container:
+### Add a brand logo
 
-```typescript
-stage.destroy()
+```ts
+import { renderQR } from 'coolqr'
+
+const canvas = await renderQR('https://example.com', {
+  size: 512,
+  logo: {
+    src: '/brand-mark.png',
+    scale: 0.16,
+    padding: 8,
+    background: '#ffffff',
+  },
+})
+
+document.querySelector('#result')?.replaceChildren(canvas)
 ```
 
-## API
+Supplying `logo` automatically selects error correction level **H**. An explicit lower level is rejected. The image must be a data URL, blob URL, same-origin URL, or a remote URL that permits CORS. CoolQR rejects an image that fails to load and rejects a badge that cannot fit without covering QR function patterns. Catch the error and ask the user to choose a smaller image or remove the logo; it will not silently produce an unbranded code. For an uploaded file, create a blob URL with `URL.createObjectURL(file)` and revoke it after the canvas is ready and no longer needed.
 
-### `CoolQR.draw(data, container, options)`
+### Encode without a browser
 
-Renders the supplied data and resolves with a `Konva.Stage`.
+```ts
+import { encodeQR } from 'coolqr'
 
-- `data`: String encoded into the QR code.
-- `container`: Browser `HTMLDivElement` that owns the stage.
-- `options`: A `QROptions` object.
+const qr = encodeQR('HELLO WORLD', { errorCorrectionLevel: 'Q' })
 
-The named `draw` export is also available.
-
-### `QROptions`
-
-- `size`: Positive output width and height in pixels.
-- `background.fill`: Canvas fill.
-- `eyes.outer.shape`: `square`, `circle`, `rounded`, `rounded2`, `rounded3`,
-  `rounded4`, `rounded5`, `rounded6`, or `squarecircle`.
-- `eyes.inner.shape` and `dots.shape`: `square`, `circle`, `diamond`, `rounded`,
-  `rounded2`, `rounded3`, `rounded4`, `sun`, `cross`, `hexagon`, or `octagon`.
-- `image.src`: Optional same-origin or CORS-enabled image URL.
-- `image.margin`: Non-negative image inset in pixels.
-- `image.hideDots`: Removes covered modules only after the image loads successfully.
-
-### `Fill`
-
-Solid fill:
-
-```typescript
-const fill = {
-	type: 'solid',
-	color: '#111827',
-} satisfies Fill
+console.log(qr.version, qr.size, qr.mask)
+console.log(qr.modules[0]) // 0 (light) or 1 (dark)
 ```
 
-Gradient fill:
+The returned `modules` and `functionModules` are row-major `Uint8Array`s of length `size * size`. Index a cell with `row * size + column`. `functionModules` marks structural cells that should keep their exact shape and position. The matrix has **no quiet zone**; add four light modules on every side if you make your own renderer. `encodeQR` does not access browser globals.
 
-```typescript
-const fill = {
-	type: 'gradient',
-	color: '#111827',
-	gradient: {
-		type: 'radial',
-		colors: ['#f43f5e', '#8b5cf6', '#2563eb'],
-	},
-} satisfies Fill
+## API reference
+
+### `encodeQR(data, options?)`
+
+Encodes a nonempty JavaScript string as QR Code Model 2. It chooses numeric, alphanumeric, or UTF-8 byte mode for the complete payload; non-ASCII byte payloads carry a UTF-8 ECI designator. It chooses the smallest version in the allowed range, generates Reed–Solomon error correction, and selects a mask. Invalid input and payloads too large for the range throw `RangeError`.
+
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `errorCorrectionLevel` | `'M'` | `'L'`, `'M'`, `'Q'`, or `'H'` |
+| `minVersion` | `1` | Smallest permitted version, 1–40 |
+| `maxVersion` | `40` | Largest permitted version, 1–40 |
+
+The result contains `size`, `version`, `errorCorrectionLevel`, `mask`, `modules`, and `functionModules`. Version 1 is 21 × 21 modules; each next version adds four modules per side. The encoder uses one mode for the complete input rather than splitting mixed text into optimized segments, so some mixed payloads can need a larger version than a segmented encoder.
+
+### `renderQR(data, options?)`
+
+Returns `Promise<HTMLCanvasElement>`. The renderer calls `encodeQR`, includes a four-module light quiet zone, and draws square structural patterns. It requires Canvas 2D and a browser `Image` implementation when a logo is used. Failures reject the promise.
+
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `size` | `512` | Exact square canvas size, integer 64–4096 pixels; must fit at least one pixel per module including quiet zone |
+| `errorCorrectionLevel` | `'M'`, or `'H'` with logo | Error correction level; a logo requires `'H'` |
+| `foreground` | `'#111827'` | Opaque dark CSS color |
+| `background` | `'#ffffff'` | Opaque light CSS color |
+| `dotStyle` | `'square'` | Data modules: `'square'`, `'rounded'`, or `'circle'` |
+| `finderStyle` | `'square'` | Finder patterns: `'square'` or `'rounded'` |
+| `logo.src` | — | Data/blob URL or CORS-enabled image URL |
+| `logo.scale` | `0.16` | Image width relative to symbol width; `0.06`–`0.20` |
+| `logo.padding` | Scaled with output size | Clear padding around image in output pixels; at most 5% of canvas size |
+| `logo.background` | `'#ffffff'` | Opaque badge color behind the image |
+
+The renderer rejects colors that are transparent, reversed, or below 4.5:1 contrast. Logo requests also fail if the chosen code cannot safely fit the badge. An error is preferable to a QR image that looks ready but cannot be trusted.
+
+### Error handling
+
+```ts
+try {
+  const canvas = await renderQR(userText, { logo: { src: logoUrl } })
+  document.querySelector('#result')?.replaceChildren(canvas)
+} catch (error) {
+  const message = error instanceof Error ? error.message : 'Could not create the QR code'
+  document.querySelector('#error')!.textContent = message
+}
 ```
 
-Gradient colors are distributed evenly and require at least two entries. `color`
-remains the fallback color for consumers that transform options before rendering.
+## Develop and verify
 
-## Development
+The library lives in `src/` and compiles to `dist/`. The public site is a separate Nuxt project in `demo/`, with a local file dependency on the package. Use pnpm 9.15.9, the version recorded in both manifests:
 
-```bash
-pnpm install
-pnpm verify
+```sh
+corepack pnpm@9.15.9 install --frozen-lockfile --ignore-scripts
+corepack pnpm@9.15.9 run verify
 
-cd demo
-pnpm install
-pnpm verify
+corepack pnpm@9.15.9 --dir demo install --frozen-lockfile --ignore-scripts
+corepack pnpm@9.15.9 --dir demo run verify
+corepack pnpm@9.15.9 --dir demo run dev
 ```
 
-`pnpm verify` runs linting, runtime tests, consumer declaration tests, and builds.
+The package gate lints, builds, runs encoder and entry-point tests, and checks a TypeScript consumer. The demo gate lints, type-checks, and builds. To inspect what users would install, run `npm pack --dry-run` after the package build. No runtime third-party packages are required by `coolqr`.
 
-## Docker Deployment
+### Run the demo container locally
 
-The production demo runs as an unprivileged, read-only container. Compose binds the
-application only to loopback on port `9491`, allowing the host's Nginx service to
-continue handling TLS.
+The Compose service binds to loopback. Choose a free port when running a disposable copy:
 
-```bash
-docker compose build
-docker compose up -d
-docker compose ps
-curl --fail http://127.0.0.1:9491/
+```sh
+COOLQR_PORT=9492 docker compose -p coolqr-validation up -d --build
+curl --fail http://127.0.0.1:9492/
+docker compose -p coolqr-validation down
 ```
 
-Use `COOLQR_PORT` to select a different loopback port for validation:
-
-```bash
-COOLQR_PORT=9492 docker compose -p coolqr-staging up -d --build
-```
-
-## Release
-
-```bash
-pnpm verify
-npm pack --dry-run
-npm run release
-```
-
-`prepack` always rebuilds the package, and `prepublishOnly` runs the full verification
-suite without recursively invoking `npm publish`.
+The production host can use a different Compose provider. Set `COOLQR_PORT` and `COOLQR_IMAGE_TAG` as needed; see `compose.yml`.
 
 ## License
 

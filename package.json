@@ -1,10 +1,18 @@
 {
 	"name": "coolqr",
-	"version": "2.1.0",
+	"version": "3.0.0",
 	"author": "nazmirket",
-	"description": "This is a custom QR code generator.",
-	"main": "dist/CoolQR.js",
-	"types": "dist/CoolQR.d.ts",
+	"description": "Dependency-free QR Code Model 2 encoder and browser canvas renderer.",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		},
+		"./package.json": "./package.json"
+	},
+	"sideEffects": false,
 	"files": [
 		"CHANGELOG.MD",
 		"dist",
@@ -12,7 +20,7 @@
 	],
 	"packageManager": "pnpm@9.15.9",
 	"scripts": {
-		"build": "rimraf dist && tsc",
+		"build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsc",
 		"lint": "eslint .",
 		"test": "npm run build && node --test tests/*.test.cjs && npm run test:types",
 		"test:types": "tsc -p tests/tsconfig.json",
@@ -27,23 +35,19 @@
 		"qr-code"
 	],
 	"license": "ISC",
-	"dependencies": {
-		"konva": "^9.2.0",
-		"qrcode": "^1.5.3"
-	},
+	"dependencies": {},
 	"devDependencies": {
-		"@tsconfig/node18": "^2.0.0",
-		"@types/node": "^18.16.3",
-		"@types/qrcode": "^1.5.1",
+		"@eslint/js": "^10.0.1",
+		"@types/node": "^24.0.0",
 		"@typescript-eslint/eslint-plugin": "^8.71.2",
 		"@typescript-eslint/parser": "^8.71.2",
-		"eslint": "^8.57.1",
-		"eslint-config-prettier": "^9.1.2",
+		"eslint": "^10.13.0",
+		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-n": "^18.4.1",
 		"eslint-plugin-prettier": "^5.5.7",
+		"globals": "^17.13.0",
 		"prettier": "^3.9.10",
-		"rimraf": "^5.0.0",
-		"typescript": "^5.0.4"
+		"typescript": "^5.9.3"
 	},
 	"pnpm": {
 		"overrides": {

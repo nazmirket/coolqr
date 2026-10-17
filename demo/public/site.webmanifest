@@ -1,11 +1,11 @@
 {
-	"name": "CoolQR – Custom QR Code Generator",
+	"name": "CoolQR – QR Code Generator with Logo",
 	"short_name": "CoolQR",
-	"description": "Create and style QR codes locally in your browser.",
+	"description": "Create a QR code, add your logo, and download a PNG in your browser.",
 	"start_url": "/",
 	"display": "standalone",
-	"background_color": "#f4f1ff",
-	"theme_color": "#f4f1ff",
+	"background_color": "#f7f7f5",
+	"theme_color": "#17191d",
 	"icons": [
 		{
 			"src": "/icon-192.png",

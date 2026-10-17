@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.0.0
+
+- Replace the Konva and third-party QR generator stack with a dependency-free QR Code Model 2 encoder and browser Canvas 2D renderer.
+- Add `encodeQR` for Node.js and browser matrix generation and `renderQR` for PNG-ready canvas output.
+- Add safe brand logo placement, high error correction, a fixed quiet zone, structural pattern protection, and color contrast checks.
+- Replace the previous drawing API with a small named-export API. This is a breaking release; migrate from `CoolQR.draw` to `renderQR`.
+- Redesign the demo as a focused QR utility with instant examples, logo upload, preview, and download.
+- Update the guide, package tooling, and release verification.
+
 ## 2.1.0
 
 - Make `QROptions.size` control the exact output dimensions.

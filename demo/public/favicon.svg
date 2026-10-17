@@ -1,15 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
-	<title>CoolQR</title>
-	<defs>
-		<linearGradient id="coolqr-gradient" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
-			<stop stop-color="#8b3dff" />
-			<stop offset="1" stop-color="#d20bc5" />
-		</linearGradient>
-	</defs>
-	<rect width="64" height="64" rx="16" fill="#121525" />
-	<g fill="url(#coolqr-gradient)">
-		<path d="M9 9h18v6H15v12H9V9Zm30 0h16v18h-6V15H39V9ZM9 37h6v12h12v6H9V37Zm40 0h6v18H37v-6h12V37Z" />
-		<path d="M22 22h20v20H22V22Zm6 6v8h8v-8h-8Z" fill="#fff" />
-		<path d="M12 30h6v6h-6v-6Zm14 0h6v6h-6v-6Zm14 0h6v6h-6v-6Zm-8 14h6v6h-6v-6Z" />
-	</g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="CoolQR">
+  <rect width="128" height="128" rx="26" fill="#17191d"/>
+  <g fill="none" stroke="#d8fb65" stroke-width="8">
+    <rect x="18" y="18" width="32" height="32" rx="4"/>
+    <rect x="78" y="18" width="32" height="32" rx="4"/>
+    <rect x="18" y="78" width="32" height="32" rx="4"/>
+  </g>
+  <g fill="#d8fb65">
+    <rect x="29" y="29" width="10" height="10" rx="2"/>
+    <rect x="89" y="29" width="10" height="10" rx="2"/>
+    <rect x="29" y="89" width="10" height="10" rx="2"/>
+    <rect x="62" y="60" width="10" height="10" rx="2"/>
+    <rect x="78" y="60" width="10" height="10" rx="2"/>
+    <rect x="94" y="60" width="10" height="10" rx="2"/>
+    <rect x="62" y="76" width="10" height="10" rx="2"/>
+    <rect x="94" y="76" width="10" height="10" rx="2"/>
+    <rect x="62" y="92" width="10" height="10" rx="2"/>
+    <rect x="78" y="92" width="10" height="10" rx="2"/>
+  </g>
 </svg>

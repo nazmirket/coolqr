@@ -8,7 +8,7 @@ export default defineNuxtConfig({
 			htmlAttrs: {
 				lang: 'en',
 			},
-			title: 'CoolQR – Custom QR Code Generator',
+			title: 'CoolQR – Free QR Code Generator with Logo',
 			meta: [
 				{
 					charset: 'utf-8',
@@ -20,7 +20,7 @@ export default defineNuxtConfig({
 				{
 					name: 'description',
 					content:
-						'Create custom QR codes in your browser with CoolQR. Customize colors, shapes, and frames, then download a crisp PNG with no uploads required.',
+						'Create a QR code for a link or message, add your logo, and download a crisp PNG. Free browser-based QR generator with no content uploads.',
 				},
 				{
 					name: 'robots',
@@ -28,7 +28,7 @@ export default defineNuxtConfig({
 				},
 				{
 					name: 'theme-color',
-					content: '#f4f1ff',
+					content: '#17191d',
 				},
 				{
 					name: 'application-name',
@@ -40,12 +40,12 @@ export default defineNuxtConfig({
 				},
 				{
 					property: 'og:title',
-					content: 'CoolQR – Custom QR Code Generator',
+					content: 'CoolQR – Free QR Code Generator with Logo',
 				},
 				{
 					property: 'og:description',
 					content:
-						'Create and style a QR code locally in your browser, then download a ready-to-share PNG.',
+						'Create a QR code, add your logo, and download a clean PNG. Your content stays in your browser.',
 				},
 				{
 					property: 'og:url',
@@ -57,7 +57,7 @@ export default defineNuxtConfig({
 				},
 				{
 					property: 'og:image:alt',
-					content: 'CoolQR custom QR code generator',
+					content: 'CoolQR free QR code generator with logo',
 				},
 				{
 					property: 'og:image:type',
@@ -77,12 +77,12 @@ export default defineNuxtConfig({
 				},
 				{
 					name: 'twitter:title',
-					content: 'CoolQR – Custom QR Code Generator',
+					content: 'CoolQR – Free QR Code Generator with Logo',
 				},
 				{
 					name: 'twitter:description',
 					content:
-						'Create and style a QR code locally in your browser, then download a ready-to-share PNG.',
+						'Create a QR code, add your logo, and download a clean PNG. Your content stays in your browser.',
 				},
 				{
 					name: 'twitter:image',
@@ -90,7 +90,7 @@ export default defineNuxtConfig({
 				},
 				{
 					name: 'twitter:image:alt',
-					content: 'CoolQR custom QR code generator',
+					content: 'CoolQR free QR code generator with logo',
 				},
 			],
 			link: [
@@ -133,12 +133,12 @@ export default defineNuxtConfig({
 						name: 'CoolQR',
 						url: 'https://qr.mirket.dev/',
 						description:
-							'Create custom QR codes in your browser with customizable colors, shapes, and frames.',
+							'Create QR codes for links and messages, add a logo, and download a PNG in your browser.',
 						applicationCategory: 'UtilitiesApplication',
 						operatingSystem: 'Any',
 						isAccessibleForFree: true,
 						featureList: [
-							'Custom QR colors, shapes, and frames',
+							'QR colors, data dot styles, and brand logo',
 							'Instant browser preview',
 							'PNG download',
 							'On-device rendering without uploads',
