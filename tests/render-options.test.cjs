@@ -9,6 +9,10 @@ class FakeContext {
 	_fillStyle = '#000000'
 	gradientCount = 0
 	shapeCount = 0
+	ellipseStyles = []
+	fillRectCalls = 0
+	filledPathPoints = []
+	pathPoints = 0
 
 	get fillStyle() {
 		return this._fillStyle
@@ -23,24 +27,33 @@ class FakeContext {
 
 	fillRect() {
 		this.shapeCount++
+		this.fillRectCalls++
 	}
 
-	beginPath() {}
+	beginPath() {
+		this.pathPoints = 0
+	}
 
 	closePath() {}
 
-	moveTo() {}
+	moveTo() {
+		this.pathPoints++
+	}
 
-	lineTo() {}
+	lineTo() {
+		this.pathPoints++
+	}
 
 	quadraticCurveTo() {}
 
 	ellipse() {
 		this.shapeCount++
+		this.ellipseStyles.push(this.fillStyle)
 	}
 
 	fill() {
 		this.shapeCount++
+		if (this.pathPoints) this.filledPathPoints.push(this.pathPoints)
 	}
 
 	createLinearGradient() {
@@ -100,7 +113,49 @@ global.Image = class FakeImage {
 }
 global.document = { createElement: () => new FakeCanvas() }
 
-const { renderQR } = require('../dist/index.js')
+const { encodeQR, renderQR } = require('../dist/index.js')
+
+function isFinder(row, column, size) {
+	return (
+		(row < 7 && column < 7) ||
+		(row < 7 && column >= size - 7) ||
+		(row >= size - 7 && column < 7)
+	)
+}
+
+test('styles every non-finder dark module and joins adjacent circles', async () => {
+	const data = 'https://example.com/coolqr'
+	const qr = encodeQR(data)
+	const darkCells = []
+	for (let row = 0; row < qr.size; row++)
+		for (let column = 0; column < qr.size; column++) {
+			const offset = row * qr.size + column
+			if (qr.modules[offset] && !isFinder(row, column, qr.size))
+				darkCells.push({ row, column, function: Boolean(qr.functionModules[offset]) })
+		}
+	assert.ok(darkCells.some(cell => cell.function))
+	const isolated = await renderQR(data, { dotStyle: 'circle', dotLayout: 'isolated' })
+	const connected = await renderQR(data, { dotStyle: 'circle', dotLayout: 'connected' })
+	assert.equal(isolated.context.ellipseStyles.length, darkCells.length)
+	assert.equal(connected.context.ellipseStyles.length, darkCells.length)
+	assert.ok(connected.context.fillRectCalls > isolated.context.fillRectCalls)
+
+	const checker = await renderQR(data, {
+		dotStyle: 'circle',
+		dotLayout: 'isolated',
+		pattern: 'checker',
+		foreground: '#111827',
+		accent: '#1e40af',
+	})
+	for (const [index, cell] of darkCells.entries()) {
+		if (!cell.function) continue
+		const expected =
+			(Math.floor(cell.row / 3) + Math.floor(cell.column / 3)) % 2 === 0
+				? '#111827'
+				: '#1e40af'
+		assert.equal(checker.context.ellipseStyles[index], expected)
+	}
+})
 
 test('renders every creative pattern and shape family through the canvas API', async () => {
 	for (const pattern of ['solid', 'linear', 'radial', 'checker']) {
@@ -125,6 +180,29 @@ test('renders every creative pattern and shape family through the canvas API', a
 	}
 })
 
+test('connected polygon families retain distinct silhouettes', async () => {
+	for (const [style, vertices] of [
+		['diamond', 4],
+		['hexagon', 6],
+		['octagon', 8],
+	]) {
+		const canvas = await renderQR('https://example.com/coolqr', {
+			dotStyle: style,
+			dotLayout: 'connected',
+		})
+		assert.deepEqual([...new Set(canvas.context.filledPathPoints)], [vertices])
+	}
+})
+
+test('rejects canvases too small to preserve styled module detail', async () => {
+	await assert.rejects(
+		renderQR('https://example.com/coolqr/v9/' + 'a'.repeat(130), {
+			size: 64,
+		}),
+		/two per module/,
+	)
+})
+
 test('rejects low contrast creative colors and invalid pattern angles', async () => {
 	await assert.rejects(
 		renderQR('hello', { finderInnerColor: '#ffffff' }),
@@ -137,6 +215,10 @@ test('rejects low contrast creative colors and invalid pattern angles', async ()
 	await assert.rejects(
 		renderQR('hello', { patternAngle: 361 }),
 		/QR pattern angle must be between 0 and 360/,
+	)
+	await assert.rejects(
+		renderQR('hello', { dotLayout: 'scattered' }),
+		/Invalid QR dot layout/,
 	)
 	await assert.rejects(
 		renderQR('hello', { foreground: 'var(--ink)' }),

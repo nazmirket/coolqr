@@ -149,8 +149,38 @@
 
 					<fieldset class="control-group"
 						><legend
-							><span class="micro-label">Data modules</span
-							><span class="control-hint">The rhythm of your code</span></legend
+							><span class="micro-label">Dot composition</span
+							><span class="control-hint">How neighboring modules meet</span></legend
+						><div class="choice-grid composition-grid"
+							><button
+								v-for="layout in dotLayouts"
+								:key="layout"
+								type="button"
+								class="choice-card composition-card"
+								:class="{ selected: dotLayout === layout }"
+								:aria-pressed="dotLayout === layout"
+								@click="dotLayout = layout"
+								><span
+									class="composition-glyph"
+									:class="`composition-${layout}`"
+									aria-hidden="true"
+									><i></i><i></i><i></i></span
+								><span class="choice-name">{{
+									layout === 'connected' ? 'Connected' : 'Individual'
+								}}</span
+								><small>{{
+									layout === 'connected' ? 'Join dark neighbors' : 'Separate marks'
+								}}</small></button
+							></div
+						><p class="control-note"
+							>Connected modules share edges; light spaces stay open.</p
+						>
+					</fieldset>
+
+					<fieldset class="control-group"
+						><legend
+							><span class="micro-label">Module silhouette</span
+							><span class="control-hint">Shape every dark mark</span></legend
 						><div class="choice-grid shape-grid"
 							><button
 								v-for="style in dotStyles"
@@ -160,8 +190,12 @@
 								:class="{ selected: dotStyle === style }"
 								:aria-pressed="dotStyle === style"
 								@click="dotStyle = style"
-								><span class="dot-glyph" :class="`dot-${style}`" aria-hidden="true"
-									><i v-for="cell in 9" :key="cell"></i></span
+								><img
+									v-if="shapePreviews[style]"
+									class="shape-preview"
+									:src="shapePreviews[style]"
+									alt=""
+								/><span v-else class="shape-preview-placeholder" aria-hidden="true"></span
 								><span class="choice-name">{{ styleLabel(style) }}</span></button
 							></div
 						></fieldset
@@ -415,7 +449,7 @@
 				<div class="scan-guide"
 					><div class="scan-guide-icon" aria-hidden="true">✓</div
 					><div
-						><strong>Scan friendly by default</strong
+						><strong>Contrast checked</strong
 						><p
 							>Keep strong contrast and leave a quiet margin around the code. Test it at
 							the size you plan to share.</p
@@ -440,6 +474,7 @@
 <script setup lang="ts">
 import type {
 	ColorPattern,
+	DotLayout,
 	DotStyle,
 	FinderInnerStyle,
 	FinderStyle,
@@ -453,8 +488,12 @@ type Example = {
 	icon: string
 	data: string
 	dot: DotStyle
+	layout: DotLayout
 	eye: FinderStyle
+	center: FinderInnerStyle
 	pattern: Pattern
+	angle: number
+	correction: Correction
 	palette: string
 }
 type Palette = Pick<
@@ -464,6 +503,7 @@ type Palette = Pick<
 
 const data = ref('https://example.com')
 const preview = ref('')
+const shapePreviews = ref<Partial<Record<DotStyle, string>>>({})
 const renderError = ref('')
 const logoError = ref('')
 const logoName = ref('')
@@ -481,6 +521,7 @@ const dotStyles: DotStyle[] = [
 	'hexagon',
 	'octagon',
 ]
+const dotLayouts: DotLayout[] = ['connected', 'isolated']
 const finderStyles: FinderStyle[] = ['square', 'rounded', 'circle']
 const finderInnerStyles: FinderInnerStyle[] = ['square', 'rounded', 'circle', 'diamond']
 const patterns: Pattern[] = ['solid', 'linear', 'radial', 'checker']
@@ -530,8 +571,12 @@ const examples: Example[] = [
 		icon: '↗',
 		data: 'https://example.com/portfolio',
 		dot: 'rounded',
+		layout: 'connected',
 		eye: 'rounded',
+		center: 'diamond',
 		pattern: 'linear',
+		angle: 45,
+		correction: 'M',
 		palette: 'Moss studio',
 	},
 	{
@@ -539,8 +584,12 @@ const examples: Example[] = [
 		icon: '⌁',
 		data: 'WIFI:T:WPA;S:Studio Guest;P:hello-coolqr;;',
 		dot: 'circle',
+		layout: 'isolated',
 		eye: 'square',
+		center: 'square',
 		pattern: 'solid',
+		angle: 45,
+		correction: 'M',
 		palette: 'Ink & paper',
 	},
 	{
@@ -548,8 +597,12 @@ const examples: Example[] = [
 		icon: '✦',
 		data: 'You are invited! Friday at 19:00. Bring a friend.',
 		dot: 'diamond',
+		layout: 'connected',
 		eye: 'circle',
+		center: 'circle',
 		pattern: 'radial',
+		angle: 45,
+		correction: 'M',
 		palette: 'Indigo dusk',
 	},
 ]
@@ -560,6 +613,7 @@ const options = ref<RenderOptions>({
 	accent: '#17191d',
 	background: '#ffffff',
 	dotStyle: 'rounded',
+	dotLayout: 'connected',
 	finderStyle: 'rounded',
 	finderInnerStyle: 'square',
 	finderColor: '#17191d',
@@ -615,6 +669,12 @@ const dotStyle = computed({
 		options.value.dotStyle = style
 	},
 })
+const dotLayout = computed({
+	get: () => options.value.dotLayout ?? 'connected',
+	set: (layout: DotLayout) => {
+		options.value.dotLayout = layout
+	},
+})
 const finderStyle = computed({
 	get: () => options.value.finderStyle ?? 'rounded',
 	set: (style: FinderStyle) => {
@@ -651,7 +711,8 @@ const logoScale = computed({
 	},
 })
 const styleSummary = computed(
-	() => `${styleLabel(dotStyle.value)} · ${styleLabel(finderStyle.value)} frame`,
+	() =>
+		`${styleLabel(dotStyle.value)} · ${dotLayout.value === 'connected' ? 'Connected' : 'Individual'} · ${styleLabel(finderStyle.value)} frame`,
 )
 const statusLabel = computed(
 	() =>
@@ -665,6 +726,7 @@ const statusLabel = computed(
 		)[status.value],
 )
 let renderSequence = 0
+let stylePreviewSequence = 0
 let logoObjectUrl = ''
 let renderTimer: ReturnType<typeof setTimeout> | undefined
 let correctionBeforeLogo: Correction | undefined
@@ -684,6 +746,30 @@ async function getRenderFunction() {
 	}
 	if (!renderFunction) throw new Error('CoolQR renderer is unavailable.')
 	return renderFunction
+}
+async function renderStyleSamples() {
+	const sequence = ++stylePreviewSequence
+	try {
+		const renderer = await getRenderFunction()
+		const previews = await Promise.all(
+			dotStyles.map(async style => {
+				const canvas = await renderer('COOLQR', {
+					size: 232,
+					dotStyle: style,
+					dotLayout: dotLayout.value,
+					foreground: '#30334a',
+				})
+				const crop = document.createElement('canvas')
+				crop.width = crop.height = 64
+				crop.getContext('2d')?.drawImage(canvas, 96, 96, 64, 64, 0, 0, 64, 64)
+				return [style, crop.toDataURL('image/png')] as const
+			}),
+		)
+		if (sequence === stylePreviewSequence)
+			shapePreviews.value = Object.fromEntries(previews)
+	} catch {
+		if (sequence === stylePreviewSequence) shapePreviews.value = {}
+	}
 }
 async function render() {
 	const sequence = ++renderSequence
@@ -717,12 +803,23 @@ async function render() {
 	}
 }
 function applyExample(example: Example) {
+	removeLogo()
 	data.value = example.data
-	dotStyle.value = example.dot
-	finderStyle.value = example.eye
-	selectedPattern.value = example.pattern
 	const palette = palettes.find(candidate => candidate.label === example.palette)
-	if (palette) applyPalette(palette)
+	if (!palette) return
+	selectedPalette.value = palette.label
+	options.value = {
+		...palette,
+		size: 512,
+		dotStyle: example.dot,
+		dotLayout: example.layout,
+		finderStyle: example.eye,
+		finderInnerStyle: example.center,
+		pattern: example.pattern,
+		patternAngle: example.angle,
+		errorCorrectionLevel: example.correction,
+		logo: undefined,
+	}
 }
 function applyPalette(palette: Palette) {
 	selectedPalette.value = palette.label
@@ -804,10 +901,15 @@ function scheduleRender() {
 	status.value = 'generating'
 	renderTimer = setTimeout(() => void render(), 90)
 }
-onMounted(() => void render())
+onMounted(() => {
+	void render()
+	void renderStyleSamples()
+})
 watch([data, options], scheduleRender, { deep: true })
+watch(dotLayout, () => void renderStyleSamples())
 onBeforeUnmount(() => {
 	renderSequence++
+	stylePreviewSequence++
 	if (renderTimer) clearTimeout(renderTimer)
 	rendered.value?.remove()
 	canvasHost.value?.replaceChildren()
@@ -1208,6 +1310,9 @@ textarea::placeholder {
 .shape-grid {
 	grid-template-columns: repeat(6, 1fr);
 }
+.composition-grid {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
 .finder-grid {
 	grid-template-columns: repeat(4, minmax(0, 1fr));
 }
@@ -1232,31 +1337,56 @@ textarea::placeholder {
 	font-size: 10px;
 	font-weight: 750;
 }
-.dot-glyph {
-	display: grid;
-	grid-template-columns: repeat(3, 7px);
-	gap: 3px;
-	padding: 4px;
+.composition-card {
+	grid-template-columns: 42px 1fr;
+	grid-template-rows: auto auto;
+	justify-items: start;
+	align-content: center;
+	gap: 3px 12px;
+	padding: 12px;
+	text-align: left;
 }
-.dot-glyph i {
-	width: 7px;
-	height: 7px;
+.composition-card small {
+	grid-column: 2;
+	color: #858982;
+	font-size: 10px;
+}
+.composition-glyph {
+	grid-row: 1 / 3;
+	display: flex;
+	align-items: center;
+	width: 37px;
+	height: 25px;
+}
+.composition-glyph i {
+	width: 13px;
+	height: 13px;
 	background: currentColor;
 }
-.dot-rounded i {
-	border-radius: 3px;
+.composition-connected i:first-child {
+	border-radius: 7px 0 0 7px;
 }
-.dot-circle i {
+.composition-connected i:last-child {
+	border-radius: 0 7px 7px 0;
+}
+.composition-isolated {
+	justify-content: space-between;
+}
+.composition-isolated i {
+	width: 9px;
+	height: 9px;
 	border-radius: 50%;
 }
-.dot-diamond i {
-	transform: rotate(45deg) scale(0.78);
+.shape-preview,
+.shape-preview-placeholder {
+	display: block;
+	width: 58px;
+	height: 58px;
+	border-radius: 7px;
+	background: #fff;
 }
-.dot-hexagon i {
-	clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
-}
-.dot-octagon i {
-	clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
+.shape-preview-placeholder {
+	background: linear-gradient(135deg, #f0f1f0, #dfe1de);
 }
 .finder-glyph {
 	display: grid;

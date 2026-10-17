@@ -3,6 +3,7 @@ export { renderQR } from './Render'
 export type { EncodeOptions, QRMatrix } from './encoder'
 export type {
 	ColorPattern,
+	DotLayout,
 	DotStyle,
 	ErrorCorrectionLevel,
 	FinderInnerStyle,

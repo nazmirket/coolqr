@@ -7,7 +7,7 @@ Create QR codes in your browser, or encode their module matrix in Node.js. CoolQ
 ## Use the builder
 
 1. Enter a URL, message, or other text. Try an example to explore a complete design.
-2. Pick data dot, outer corner, and inner corner shapes from the visual tiles. Select a solid color, gradient, or alternating pattern, then tune the colors and gradient direction.
+2. Choose whether dark modules connect into flowing contours or remain individual marks. Pick their silhouette, finder shapes, and ink pattern from the visual tiles, then tune the colors and gradient direction.
 3. Optionally upload a PNG, JPEG, WebP, or SVG logo. The logo is placed over data modules with high error correction; the builder does not upload the image.
 4. Choose the output size and error correction level, then download a PNG. Scan the exported image at the size and on the material where it will appear.
 
@@ -23,13 +23,13 @@ The builder runs QR generation in your browser. Its preview and logo stay on you
 
 ## Install the library
 
-The API in this guide is available in this repository's 3.1.0 source. Until that version is published to npm, install directly from this repository:
+The API in this guide is available in this repository's 3.2.0 source. Until that version is published to npm, install directly from this repository:
 
 ```sh
 npm install github:nazmirket/coolqr#master
 ```
 
-Once 3.1.0 or newer is published, `npm install coolqr` will provide the same API.
+Once 3.2.0 or newer is published, `npm install coolqr` will provide the same API.
 
 CoolQR 3 is a breaking change from the previous `CoolQR.draw`/Konva API. Use the named `encodeQR` and `renderQR` functions below. The package entry point is CommonJS with TypeScript declarations; bundlers can consume it in browser applications. `encodeQR` works in Node.js. `renderQR` needs a browser with Canvas 2D.
 
@@ -46,6 +46,7 @@ const canvas = await renderQR('https://example.com/portfolio', {
   pattern: 'linear',
   patternAngle: 35,
   dotStyle: 'hexagon',
+  dotLayout: 'connected',
   finderStyle: 'rounded',
   finderInnerStyle: 'circle',
   finderColor: '#18212b',
@@ -92,7 +93,7 @@ console.log(qr.version, qr.size, qr.mask)
 console.log(qr.modules[0]) // 0 (light) or 1 (dark)
 ```
 
-The returned `modules` and `functionModules` are row-major `Uint8Array`s of length `size * size`. Index a cell with `row * size + column`. `functionModules` marks structural cells that should keep their exact shape and position. The matrix has **no quiet zone**; add four light modules on every side if you make your own renderer. `encodeQR` does not access browser globals.
+The returned `modules` and `functionModules` are row-major `Uint8Array`s of length `size * size`. Index a cell with `row * size + column`. `functionModules` marks structural cells whose dark/light value and position must remain intact; CoolQR can style their dark silhouette. The matrix has **no quiet zone**; add four light modules on every side if you make your own renderer. `encodeQR` does not access browser globals.
 
 ## API reference
 
@@ -110,18 +111,19 @@ The result contains `size`, `version`, `errorCorrectionLevel`, `mask`, `modules`
 
 ### `renderQR(data, options?)`
 
-Returns `Promise<HTMLCanvasElement>`. The renderer calls `encodeQR`, includes a four-module light quiet zone, and draws square structural patterns. It requires Canvas 2D and a browser `Image` implementation when a logo is used. Failures reject the promise.
+Returns `Promise<HTMLCanvasElement>`. The renderer calls `encodeQR`, includes a four-module light quiet zone, and styles every dark module outside the three separately drawn finder patterns. It requires Canvas 2D and a browser `Image` implementation when a logo is used. Failures reject the promise.
 
 | Option | Default | Meaning |
 | --- | --- | --- |
-| `size` | `512` | Exact square canvas size, integer 64–4096 pixels; must fit at least one pixel per module including quiet zone |
+| `size` | `512` | Exact square canvas size, integer 64–4096 pixels; must fit at least two pixels per module including quiet zone |
 | `errorCorrectionLevel` | `'M'`, or `'H'` with logo | Error correction level; a logo requires `'H'` |
-| `foreground` | `'#111827'` | Opaque dark base color for the data modules and default finder color |
+| `foreground` | `'#111827'` | Opaque dark base color for modules and default finder color |
 | `accent` | — | Second opaque dark color for a non-solid pattern |
 | `background` | `'#ffffff'` | Opaque light CSS color |
-| `pattern` | `'solid'` | Data color treatment: `'solid'`, `'linear'`, `'radial'`, or `'checker'` |
+| `pattern` | `'solid'` | Module color treatment: `'solid'`, `'linear'`, `'radial'`, or `'checker'` |
 | `patternAngle` | `45` | Linear gradient angle in degrees from 0 to 360 |
-| `dotStyle` | `'square'` | Data modules: `'square'`, `'rounded'`, `'circle'`, `'diamond'`, `'hexagon'`, or `'octagon'` |
+| `dotStyle` | `'square'` | Module silhouette: `'square'`, `'rounded'`, `'circle'`, `'diamond'`, `'hexagon'`, or `'octagon'` |
+| `dotLayout` | `'connected'` | `'connected'` joins dark neighbors into contours; `'isolated'` draws individual marks (square marks have a small gap) |
 | `finderStyle` | `'square'` | Outer finder frames: `'square'`, `'rounded'`, or `'circle'` |
 | `finderInnerStyle` | `'square'` | Finder centers: `'square'`, `'rounded'`, `'circle'`, or `'diamond'` |
 | `finderColor` | `foreground` | Opaque dark outer finder color |
@@ -131,7 +133,7 @@ Returns `Promise<HTMLCanvasElement>`. The renderer calls `encodeQR`, includes a 
 | `logo.padding` | Scaled with output size | Clear padding around image in output pixels; at most 5% of canvas size |
 | `logo.background` | `'#ffffff'` | Opaque light badge color behind the image; must contrast with each dark color |
 
-The renderer rejects colors that are transparent, reversed, or below 4.5:1 contrast. Gradient endpoints and alternating pattern colors are checked individually. Structural modules outside the three finder patterns remain square and use the base foreground color; the four-module quiet zone remains light. Logo requests also fail if the chosen code cannot safely fit the badge. The guardrails improve reliability, but they cannot guarantee that every decorative code will scan on every camera, surface, or print size.
+The renderer rejects colors that are transparent, reversed, or below 4.5:1 contrast. Gradient endpoints and checker colors are checked individually. Connected shapes join only cardinally adjacent dark modules and never enter light cells; the four-module quiet zone remains light. Timing, alignment, format, and version modules use the selected silhouette and ink while retaining their encoded dark/light values. Finder frames remain a separate locator layer. Logo requests also fail if the chosen code cannot safely fit the badge. These guardrails improve reliability, but they cannot guarantee that every decorative code will scan on every camera, surface, or print size.
 
 ### Error handling
 

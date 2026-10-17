@@ -1,8 +1,11 @@
 /** The QR Code Model 2 error-correction level. */
 export type ErrorCorrectionLevel = 'L' | 'M' | 'Q' | 'H'
 
-/** The visual treatment of data modules. Structural modules stay square. */
+/** Shape of every dark module outside the three finder patterns. */
 export type DotStyle = 'square' | 'rounded' | 'circle' | 'diamond' | 'hexagon' | 'octagon'
+
+/** Whether neighboring dark modules share one contour or remain individual marks. */
+export type DotLayout = 'connected' | 'isolated'
 
 /** The shape used for the outer finder-pattern ring. */
 export type FinderStyle = 'square' | 'rounded' | 'circle'
@@ -10,7 +13,7 @@ export type FinderStyle = 'square' | 'rounded' | 'circle'
 /** The shape used for the dark center of each finder pattern. */
 export type FinderInnerStyle = 'square' | 'rounded' | 'circle' | 'diamond'
 
-/** The color treatment used for data modules. */
+/** The color treatment used for dark modules outside the finder patterns. */
 export type ColorPattern = 'solid' | 'linear' | 'radial' | 'checker'
 
 /** A small image placed over data modules with a solid backing. */
@@ -35,8 +38,10 @@ export interface RenderOptions {
 	foreground?: string
 	/** CSS color for the background and quiet zone. Default #ffffff. */
 	background?: string
-	/** Shape of data modules. Structural modules remain square. Default square. */
+	/** Shape of dark modules outside the finder patterns. Default square. */
 	dotStyle?: DotStyle
+	/** Connected contours or individual marks. Default connected. */
+	dotLayout?: DotLayout
 	/** Shape of the three finder-pattern rings. Default square. */
 	finderStyle?: FinderStyle
 	/** Shape of the dark center in each finder pattern. Default square. */
@@ -45,7 +50,7 @@ export interface RenderOptions {
 	finderColor?: string
 	/** CSS color for finder-pattern centers. Defaults to finderColor. */
 	finderInnerColor?: string
-	/** Color pattern for data modules. Default solid. */
+	/** Color pattern for dark modules outside the finder patterns. Default solid. */
 	pattern?: ColorPattern
 	/** Second dark color used by linear, radial, and checker patterns. */
 	accent?: string

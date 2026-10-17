@@ -6,6 +6,7 @@ const options: RenderOptions = {
 	foreground: '#111827',
 	background: '#ffffff',
 	dotStyle: 'rounded',
+	dotLayout: 'connected',
 	finderStyle: 'rounded',
 	finderInnerStyle: 'diamond',
 	finderColor: '#0f172a',

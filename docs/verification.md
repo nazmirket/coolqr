@@ -14,3 +14,12 @@ Target branch: master
 - OG image itself decoded with zbarimg to https://qr.mirket.dev/.
 
 Known safe failure: A 1,000-character alphanumeric payload at ECC H cannot fit a default 8px logo badge without covering function patterns. `renderQR` throws an actionable error. Reducing logo padding to 3px succeeds. Invalid contrast, size, logo scale, padding, explicit low ECC with logo, broken logo URL, empty data and payload overflow also reject as designed.
+
+## 3.2 visual composition acceptance — 2026-10-17
+
+- `corepack pnpm@9.15.9 run verify`: pass; 11 Node tests, lint, package build and TypeScript consumer check. The focused tests count every dark non-finder module, distinguish connected diamond/hexagon/octagon silhouettes, and reject undersized dense output.
+- `corepack pnpm@9.15.9 --dir demo run verify`: pass after refreshing the demo's local `coolqr` package copy; lint, typecheck and production build. `npm pack --dry-run --json` contains only package files and no bundled dependencies.
+- Production browser renderer: Chrome `BarcodeDetector` decoded the exact payload in 24 cases (six shapes × connected/isolated × short/dense inputs), plus solid, linear, radial and checker ink on connected hexagons. A 64px dense export rejects with the expected two-pixels-per-module error.
+- Independent zbarimg 0.23.93 decoded a connected rounded, colored portfolio example and a dense connected diamond PNG to their exact inputs.
+- Browser UI: the Portfolio example reset the full design to Moss palette, connected rounded marks, diamond finder centers and linear ink, and its canvas decoded. Desktop and 390px mobile views were inspected; mobile document scroll width equaled the viewport width.
+- Podman Compose canary: built the current source, served HTTP 200 on loopback port 9492, then was removed.

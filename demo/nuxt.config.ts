@@ -20,7 +20,7 @@ export default defineNuxtConfig({
 				{
 					name: 'description',
 					content:
-						'Create custom QR codes with geometric shapes, color patterns, and your logo. Preview and download a crisp PNG privately in your browser.',
+						'Create custom QR codes with connected shapes, color patterns, and your logo. Preview and download a crisp PNG privately in your browser.',
 				},
 				{
 					name: 'robots',
@@ -45,7 +45,7 @@ export default defineNuxtConfig({
 				{
 					property: 'og:description',
 					content:
-						'Design a QR code with visual shape pickers, color patterns, and your logo. Preview and download privately in your browser.',
+						'Design a QR code with connected shapes, color patterns, and your logo. Preview and download privately in your browser.',
 				},
 				{
 					property: 'og:url',
@@ -82,7 +82,7 @@ export default defineNuxtConfig({
 				{
 					name: 'twitter:description',
 					content:
-						'Design a QR code with visual shape pickers, color patterns, and your logo. Preview and download privately in your browser.',
+						'Design a QR code with connected shapes, color patterns, and your logo. Preview and download privately in your browser.',
 				},
 				{
 					name: 'twitter:image',
@@ -133,12 +133,12 @@ export default defineNuxtConfig({
 						name: 'CoolQR',
 						url: 'https://qr.mirket.dev/',
 						description:
-							'Create custom QR codes for links and messages with geometric shapes, color patterns, a logo, and PNG download in your browser.',
+							'Create custom QR codes for links and messages with connected shapes, color patterns, a logo, and PNG download in your browser.',
 						applicationCategory: 'UtilitiesApplication',
 						operatingSystem: 'Any',
 						isAccessibleForFree: true,
 						featureList: [
-							'Visual data dot and finder shape selection',
+							'Visual connected or individual module shape selection',
 							'Solid, gradient, and alternating color patterns',
 							'Custom colors and brand logo',
 							'Instant browser preview',

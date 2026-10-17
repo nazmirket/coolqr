@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.2.0
+
+- Add connected and individual module compositions. Connected contours join neighboring dark modules while keeping light cells open.
+- Apply the selected shape and ink treatment to timing, alignment, format, and version modules outside the three finder patterns.
+- Make the builder's shape tiles show real rendered module samples and add a visual composition selector.
+- Group checker ink into larger blocks so connected shapes read as coherent forms.
+- Require at least two output pixels per module to preserve styled detail in dense codes.
+
 ## 3.1.0
 
 - Add visual style selection for data dots and both parts of finder patterns in the browser builder.

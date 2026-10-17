@@ -2,6 +2,7 @@ import { encodeQR } from './encoder'
 import type { QRMatrix } from './encoder'
 import type {
 	ColorPattern,
+	DotLayout,
 	DotStyle,
 	FinderInnerStyle,
 	FinderStyle,
@@ -20,6 +21,7 @@ const DOT_STYLES: readonly DotStyle[] = [
 	'hexagon',
 	'octagon',
 ]
+const DOT_LAYOUTS: readonly DotLayout[] = ['connected', 'isolated']
 const FINDER_STYLES: readonly FinderStyle[] = ['square', 'rounded', 'circle']
 const FINDER_INNER_STYLES: readonly FinderInnerStyle[] = [
 	'square',
@@ -98,7 +100,7 @@ function validateColors(
 ): void {
 	const scratch = document.createElement('canvas')
 	scratch.width = scratch.height = 1
-	const ctx = scratch.getContext('2d')
+	const ctx = scratch.getContext('2d', { willReadFrequently: true })
 	if (!ctx) throw new Error('Canvas 2D is unavailable')
 	const back = getColor(ctx, background)
 	if (back[3] !== 255) throw new RangeError('QR background must be an opaque color')
@@ -216,6 +218,110 @@ function drawShape(
 	}
 }
 
+interface ModuleNeighbors {
+	top: boolean
+	right: boolean
+	bottom: boolean
+	left: boolean
+	topLeft: boolean
+	topRight: boolean
+	bottomRight: boolean
+	bottomLeft: boolean
+}
+
+function drawConnectedContour(
+	ctx: CanvasRenderingContext2D,
+	x: number,
+	y: number,
+	width: number,
+	height: number,
+	style: DotStyle,
+	neighbors: ModuleNeighbors,
+): void {
+	if (style === 'square') {
+		ctx.fillRect(x, y, width, height)
+		return
+	}
+	if (style === 'circle' || style === 'diamond' || style === 'hexagon') {
+		// Every bridge stays inside its own dark cell. The neighboring cell draws
+		// the other half, so light modules and finder separators remain untouched.
+		const bridgeRatio = style === 'circle' ? 0.8 : style === 'diamond' ? 0.55 : 0.66
+		const bridgeWidth = width * bridgeRatio
+		const bridgeHeight = height * bridgeRatio
+		const cornerRatio = style === 'circle' ? 0.42 : 0.34
+		const cornerWidth = width * cornerRatio
+		const cornerHeight = height * cornerRatio
+		// A fully dark 2x2 intersection has no pinhole in its center.
+		if (neighbors.top && neighbors.left && neighbors.topLeft)
+			ctx.fillRect(x, y, cornerWidth, cornerHeight)
+		if (neighbors.top && neighbors.right && neighbors.topRight)
+			ctx.fillRect(x + width - cornerWidth, y, cornerWidth, cornerHeight)
+		if (neighbors.bottom && neighbors.right && neighbors.bottomRight)
+			ctx.fillRect(
+				x + width - cornerWidth,
+				y + height - cornerHeight,
+				cornerWidth,
+				cornerHeight,
+			)
+		if (neighbors.bottom && neighbors.left && neighbors.bottomLeft)
+			ctx.fillRect(x, y + height - cornerHeight, cornerWidth, cornerHeight)
+		if (neighbors.left || neighbors.right) {
+			ctx.fillRect(
+				neighbors.left ? x : x + width / 2,
+				y + (height - bridgeHeight) / 2,
+				(neighbors.left && neighbors.right ? 1 : 0.5) * width,
+				bridgeHeight,
+			)
+		}
+		if (neighbors.top || neighbors.bottom) {
+			ctx.fillRect(
+				x + (width - bridgeWidth) / 2,
+				neighbors.top ? y : y + height / 2,
+				bridgeWidth,
+				(neighbors.top && neighbors.bottom ? 1 : 0.5) * height,
+			)
+		}
+		drawShape(ctx, x, y, width, height, style)
+		return
+	}
+	const topLeft = !neighbors.top && !neighbors.left
+	const topRight = !neighbors.top && !neighbors.right
+	const bottomRight = !neighbors.bottom && !neighbors.right
+	const bottomLeft = !neighbors.bottom && !neighbors.left
+	if (style === 'rounded') {
+		const radius = Math.min(width, height) * 0.32
+		const tl = topLeft ? radius : 0
+		const tr = topRight ? radius : 0
+		const br = bottomRight ? radius : 0
+		const bl = bottomLeft ? radius : 0
+		ctx.beginPath()
+		ctx.moveTo(x + tl, y)
+		ctx.lineTo(x + width - tr, y)
+		ctx.quadraticCurveTo(x + width, y, x + width, y + tr)
+		ctx.lineTo(x + width, y + height - br)
+		ctx.quadraticCurveTo(x + width, y + height, x + width - br, y + height)
+		ctx.lineTo(x + bl, y + height)
+		ctx.quadraticCurveTo(x, y + height, x, y + height - bl)
+		ctx.lineTo(x, y + tl)
+		ctx.quadraticCurveTo(x, y, x + tl, y)
+		ctx.closePath()
+		ctx.fill()
+		return
+	}
+	// Octagon facets shape the exposed silhouette of the cluster, not every cell.
+	const cut = Math.min(width, height) * 0.18
+	polygon(ctx, [
+		[x + (topLeft ? cut : 0), y],
+		[x + width - (topRight ? cut : 0), y],
+		[x + width, y + (topRight ? cut : 0)],
+		[x + width, y + height - (bottomRight ? cut : 0)],
+		[x + width - (bottomRight ? cut : 0), y + height],
+		[x + (bottomLeft ? cut : 0), y + height],
+		[x, y + height - (bottomLeft ? cut : 0)],
+		[x, y + (topLeft ? cut : 0)],
+	])
+}
+
 function drawDataModule(
 	ctx: CanvasRenderingContext2D,
 	x: number,
@@ -223,8 +329,16 @@ function drawDataModule(
 	width: number,
 	height: number,
 	style: DotStyle,
+	layout: DotLayout,
+	neighbors: ModuleNeighbors,
 ): void {
-	drawShape(ctx, x, y, width, height, style)
+	if (layout === 'connected') {
+		drawConnectedContour(ctx, x, y, width, height, style, neighbors)
+	} else if (style === 'square') {
+		ctx.fillRect(x + width * 0.04, y + height * 0.04, width * 0.92, height * 0.92)
+	} else {
+		drawShape(ctx, x, y, width, height, style)
+	}
 }
 
 function drawFinder(
@@ -450,11 +564,14 @@ export async function renderQR(
 		throw new RangeError('QR canvas size must be an integer from 64 to 4096 pixels')
 	}
 	const dotStyle = options.dotStyle ?? 'square'
+	const dotLayout = options.dotLayout ?? 'connected'
 	const finderStyle = options.finderStyle ?? 'square'
 	const finderInnerStyle = options.finderInnerStyle ?? 'square'
 	const pattern = options.pattern ?? 'solid'
 	if (!(DOT_STYLES as readonly string[]).includes(dotStyle))
 		throw new RangeError('Invalid QR dot style')
+	if (!(DOT_LAYOUTS as readonly string[]).includes(dotLayout))
+		throw new RangeError('Invalid QR dot layout')
 	if (!(FINDER_STYLES as readonly string[]).includes(finderStyle))
 		throw new RangeError('Invalid QR finder style')
 	if (!(FINDER_INNER_STYLES as readonly string[]).includes(finderInnerStyle))
@@ -479,9 +596,9 @@ export async function renderQR(
 	const errorCorrectionLevel = options.errorCorrectionLevel ?? (options.logo ? 'H' : 'M')
 	const qr = encodeQR(data, { errorCorrectionLevel })
 	const totalModules = qr.size + QUIET_ZONE * 2
-	if (size < totalModules)
+	if (size < totalModules * 2)
 		throw new RangeError(
-			`Canvas needs at least ${totalModules} pixels for this QR version`,
+			`Canvas needs at least ${totalModules * 2} pixels (two per module) for this QR version`,
 		)
 	const foreground = options.foreground ?? '#111827'
 	const background = options.background ?? '#ffffff'
@@ -514,15 +631,21 @@ export async function renderQR(
 		symbolEnd,
 		options.patternAngle ?? 45,
 	)
+	const darkOutsideFinder = (row: number, column: number): boolean =>
+		row >= 0 &&
+		column >= 0 &&
+		row < qr.size &&
+		column < qr.size &&
+		qr.modules[row * qr.size + column] === 1 &&
+		!isFinder(row, column, qr.size)
 	for (let row = 0; row < qr.size; row++) {
 		for (let column = 0; column < qr.size; column++) {
 			const offset = row * qr.size + column
 			if (!qr.modules[offset] || isFinder(row, column, qr.size)) continue
-			const isStructural = qr.functionModules[offset] === 1
-			if (isStructural) {
-				ctx.fillStyle = foreground
-			} else if (pattern === 'checker') {
-				ctx.fillStyle = (row + column) % 2 === 0 ? foreground : accent
+			if (pattern === 'checker') {
+				// Larger ink blocks preserve the sense of a continuous cluster.
+				ctx.fillStyle =
+					(Math.floor(row / 3) + Math.floor(column / 3)) % 2 === 0 ? foreground : accent
 			} else {
 				ctx.fillStyle = dataFill
 			}
@@ -530,7 +653,16 @@ export async function renderQR(
 			const y = edge(QUIET_ZONE + row)
 			const width = edge(QUIET_ZONE + column + 1) - x
 			const height = edge(QUIET_ZONE + row + 1) - y
-			drawDataModule(ctx, x, y, width, height, isStructural ? 'square' : dotStyle)
+			drawDataModule(ctx, x, y, width, height, dotStyle, dotLayout, {
+				top: darkOutsideFinder(row - 1, column),
+				right: darkOutsideFinder(row, column + 1),
+				bottom: darkOutsideFinder(row + 1, column),
+				left: darkOutsideFinder(row, column - 1),
+				topLeft: darkOutsideFinder(row - 1, column - 1),
+				topRight: darkOutsideFinder(row - 1, column + 1),
+				bottomRight: darkOutsideFinder(row + 1, column + 1),
+				bottomLeft: darkOutsideFinder(row + 1, column - 1),
+			})
 		}
 	}
 	drawFinder(
