@@ -23,13 +23,13 @@ The builder runs QR generation in your browser. Its preview and logo stay on you
 
 ## Install the library
 
-The API in this guide is available in this repository's 3.2.0 source. Until that version is published to npm, install directly from this repository:
+Install the published package from npm:
 
 ```sh
-npm install github:nazmirket/coolqr#master
+npm install coolqr
 ```
 
-Once 3.2.0 or newer is published, `npm install coolqr` will provide the same API.
+This guide covers CoolQR 3.2.0 and newer. To try unreleased changes from the repository, install `github:nazmirket/coolqr#master` instead.
 
 CoolQR 3 is a breaking change from the previous `CoolQR.draw`/Konva API. Use the named `encodeQR` and `renderQR` functions below. The package entry point is CommonJS with TypeScript declarations; bundlers can consume it in browser applications. `encodeQR` works in Node.js. `renderQR` needs a browser with Canvas 2D.
 
