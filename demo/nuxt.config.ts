@@ -8,7 +8,7 @@ export default defineNuxtConfig({
 			htmlAttrs: {
 				lang: 'en',
 			},
-			title: 'CoolQR – Free QR Code Generator with Logo',
+			title: 'CoolQR – Custom QR Code Generator with Shapes and Logo',
 			meta: [
 				{
 					charset: 'utf-8',
@@ -20,7 +20,7 @@ export default defineNuxtConfig({
 				{
 					name: 'description',
 					content:
-						'Create a QR code for a link or message, add your logo, and download a crisp PNG. Free browser-based QR generator with no content uploads.',
+						'Create custom QR codes with geometric shapes, color patterns, and your logo. Preview and download a crisp PNG privately in your browser.',
 				},
 				{
 					name: 'robots',
@@ -40,12 +40,12 @@ export default defineNuxtConfig({
 				},
 				{
 					property: 'og:title',
-					content: 'CoolQR – Free QR Code Generator with Logo',
+					content: 'CoolQR – Custom QR Code Generator with Shapes and Logo',
 				},
 				{
 					property: 'og:description',
 					content:
-						'Create a QR code, add your logo, and download a clean PNG. Your content stays in your browser.',
+						'Design a QR code with visual shape pickers, color patterns, and your logo. Preview and download privately in your browser.',
 				},
 				{
 					property: 'og:url',
@@ -77,12 +77,12 @@ export default defineNuxtConfig({
 				},
 				{
 					name: 'twitter:title',
-					content: 'CoolQR – Free QR Code Generator with Logo',
+					content: 'CoolQR – Custom QR Code Generator with Shapes and Logo',
 				},
 				{
 					name: 'twitter:description',
 					content:
-						'Create a QR code, add your logo, and download a clean PNG. Your content stays in your browser.',
+						'Design a QR code with visual shape pickers, color patterns, and your logo. Preview and download privately in your browser.',
 				},
 				{
 					name: 'twitter:image',
@@ -133,12 +133,14 @@ export default defineNuxtConfig({
 						name: 'CoolQR',
 						url: 'https://qr.mirket.dev/',
 						description:
-							'Create QR codes for links and messages, add a logo, and download a PNG in your browser.',
+							'Create custom QR codes for links and messages with geometric shapes, color patterns, a logo, and PNG download in your browser.',
 						applicationCategory: 'UtilitiesApplication',
 						operatingSystem: 'Any',
 						isAccessibleForFree: true,
 						featureList: [
-							'QR colors, data dot styles, and brand logo',
+							'Visual data dot and finder shape selection',
+							'Solid, gradient, and alternating color patterns',
+							'Custom colors and brand logo',
 							'Instant browser preview',
 							'PNG download',
 							'On-device rendering without uploads',

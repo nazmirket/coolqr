@@ -18,120 +18,345 @@
 				><span class="eyebrow-dot" aria-hidden="true"></span>Private, browser-side QR
 				utility</p
 			>
-			<h1 id="page-title">Create a QR code in seconds.</h1>
+			<h1 id="page-title">Make your code<br /><em>look like you.</em></h1>
 			<p class="intro-copy"
-				>Paste a link or message, add your mark, and download a clean PNG. Nothing leaves
-				your browser.</p
+				>Build a QR code with expressive shapes, colors, patterns, and your own mark.
+				Everything stays on your device.</p
 			>
 		</section>
 
 		<section class="builder" aria-label="QR code builder">
+			<div class="mobile-preview-bar">
+				<button
+					type="button"
+					class="mobile-preview-button"
+					aria-label="Jump to full QR preview"
+					@click="jumpToPreview"
+				>
+					<span class="mobile-preview-thumb" aria-hidden="true"
+						><img v-if="preview" :src="preview" alt="" /><span
+							v-else
+							class="mobile-preview-placeholder"
+						></span
+					></span>
+					<span class="mobile-preview-copy"
+						><strong>{{ status === 'ready' ? 'Live preview ready' : statusLabel }}</strong
+						><small>{{ styleSummary }}</small></span
+					>
+					<span class="mobile-preview-arrow" aria-hidden="true">↘</span>
+				</button>
+			</div>
 			<div class="form-panel">
-				<div class="panel-heading"
-					><div><p class="step-label">01 / Content</p><h2>What should it open?</h2></div
-					><span class="counter" aria-live="polite">{{ data.length }}/2000</span></div
-				>
-				<label class="field-label" for="qr-content">URL or message</label>
-				<textarea
-					id="qr-content"
-					v-model="data"
-					maxlength="2000"
-					rows="3"
-					placeholder="https://example.com"
-					@keydown.meta.enter.prevent="download"
-					@keydown.ctrl.enter.prevent="download"
-				></textarea>
-				<p class="field-help"
-					>URLs, plain text, contact details, and short notes all work.</p
-				>
-				<div class="examples" aria-labelledby="examples-title"
-					><span id="examples-title" class="micro-label">Try an example</span
-					><div class="example-list"
-						><button
-							v-for="example in examples"
-							:key="example.label"
-							type="button"
-							class="example-button"
-							@click="applyExample(example)"
-							><span class="example-icon" aria-hidden="true">{{ example.icon }}</span
-							><span>{{ example.label }}</span></button
+				<section aria-labelledby="content-title">
+					<div class="panel-heading"
+						><div
+							><p class="step-label">01 / Content</p
+							><h2 id="content-title">What should it open?</h2></div
+						><span class="counter" aria-live="polite">{{ data.length }}/2000</span></div
+					>
+					<label class="field-label" for="qr-content">URL or message</label>
+					<textarea
+						id="qr-content"
+						v-model="data"
+						maxlength="2000"
+						rows="3"
+						placeholder="https://example.com"
+						@keydown.meta.enter.prevent="download"
+						@keydown.ctrl.enter.prevent="download"
+					></textarea>
+					<p class="field-help"
+						>URLs, plain text, contact details, and short notes all work.</p
+					>
+					<div class="examples" aria-labelledby="examples-title"
+						><span id="examples-title" class="micro-label">Try an example</span
+						><div class="example-list"
+							><button
+								v-for="example in examples"
+								:key="example.label"
+								type="button"
+								class="example-button"
+								@click="applyExample(example)"
+								><span class="example-icon" aria-hidden="true">{{ example.icon }}</span
+								><span>{{ example.label }}</span></button
+							></div
 						></div
-					></div
-				>
+					>
+				</section>
 
 				<div class="divider"></div>
-				<div class="panel-heading compact"
-					><div><p class="step-label">02 / Style</p><h2>Keep it on brand</h2></div></div
-				>
-				<div class="color-row"
-					><label class="color-field" for="ink-color"
-						><span class="micro-label">Ink</span
-						><span class="color-input-wrap"
-							><input id="ink-color" v-model="inkColor" type="color" /><code>{{
-								inkColor
-							}}</code></span
-						></label
-					><label class="color-field" for="background-color"
-						><span class="micro-label">Background</span
-						><span class="color-input-wrap"
-							><input
-								id="background-color"
-								v-model="backgroundColor"
-								type="color"
-							/><code>{{ backgroundColor }}</code></span
-						></label
-					></div
-				>
-				<div class="select-row"
-					><label class="select-field" for="dot-shape"
-						><span class="micro-label">Dot shape</span
-						><select id="dot-shape" v-model="dotStyle"
-							><option v-for="style in dotStyles" :key="style" :value="style">{{
-								styleLabel(style)
-							}}</option></select
-						></label
-					><label class="select-field" for="eye-shape"
-						><span class="micro-label">Corner shape</span
-						><select id="eye-shape" v-model="finderStyle"
-							><option v-for="style in finderStyles" :key="style" :value="style">{{
-								styleLabel(style)
-							}}</option></select
-						></label
-					></div
-				>
+
+				<section aria-labelledby="design-title">
+					<div class="panel-heading"
+						><div
+							><p class="step-label">02 / Design</p
+							><h2 id="design-title">Make it unmistakably yours</h2></div
+						><span class="style-count">{{ styleSummary }}</span></div
+					>
+					<fieldset class="control-group"
+						><legend
+							><span class="micro-label">Color mood</span
+							><span class="control-hint">Start with a palette</span></legend
+						><div class="palette-grid"
+							><button
+								v-for="palette in palettes"
+								:key="palette.label"
+								type="button"
+								class="palette-card"
+								:class="{ selected: palette.label === selectedPalette }"
+								:aria-pressed="palette.label === selectedPalette"
+								@click="applyPalette(palette)"
+								><span
+									class="palette-swatch"
+									:style="paletteStyle(palette)"
+									aria-hidden="true"
+									><i></i><b></b><u></u></span
+								><span>{{ palette.label }}</span
+								><span
+									v-if="palette.label === selectedPalette"
+									class="selected-mark"
+									aria-hidden="true"
+									>✓</span
+								></button
+							></div
+						></fieldset
+					>
+					<div class="color-grid"
+						><label class="color-field" for="ink-color"
+							><span class="micro-label">Base ink</span
+							><span class="color-input-wrap"
+								><input id="ink-color" v-model="inkColor" type="color" /><code>{{
+									inkColor
+								}}</code></span
+							></label
+						><label class="color-field" for="accent-color"
+							><span class="micro-label">Accent ink</span
+							><span class="color-input-wrap"
+								><input id="accent-color" v-model="accentColor" type="color" /><code>{{
+									accentColor
+								}}</code></span
+							></label
+						><label class="color-field" for="background-color"
+							><span class="micro-label">Background</span
+							><span class="color-input-wrap"
+								><input
+									id="background-color"
+									v-model="backgroundColor"
+									type="color"
+								/><code>{{ backgroundColor }}</code></span
+							></label
+						></div
+					>
+
+					<fieldset class="control-group"
+						><legend
+							><span class="micro-label">Data modules</span
+							><span class="control-hint">The rhythm of your code</span></legend
+						><div class="choice-grid shape-grid"
+							><button
+								v-for="style in dotStyles"
+								:key="style"
+								type="button"
+								class="choice-card"
+								:class="{ selected: dotStyle === style }"
+								:aria-pressed="dotStyle === style"
+								@click="dotStyle = style"
+								><span class="dot-glyph" :class="`dot-${style}`" aria-hidden="true"
+									><i v-for="cell in 9" :key="cell"></i></span
+								><span class="choice-name">{{ styleLabel(style) }}</span></button
+							></div
+						></fieldset
+					>
+					<fieldset class="control-group"
+						><legend
+							><span class="micro-label">Finder frame</span
+							><span class="control-hint">Outer corner style</span></legend
+						><div class="choice-grid finder-grid"
+							><button
+								v-for="style in finderStyles"
+								:key="style"
+								type="button"
+								class="choice-card"
+								:class="{ selected: finderStyle === style }"
+								:aria-pressed="finderStyle === style"
+								@click="finderStyle = style"
+								><span class="finder-glyph" :class="`finder-${style}`" aria-hidden="true"
+									><i><b></b></i></span
+								><span class="choice-name">{{ styleLabel(style) }}</span></button
+							></div
+						></fieldset
+					>
+					<fieldset class="control-group"
+						><legend
+							><span class="micro-label">Finder center</span
+							><span class="control-hint">Inner eye treatment</span></legend
+						><div class="choice-grid finder-grid"
+							><button
+								v-for="style in finderInnerStyles"
+								:key="style"
+								type="button"
+								class="choice-card"
+								:class="{ selected: finderInnerStyle === style }"
+								:aria-pressed="finderInnerStyle === style"
+								@click="finderInnerStyle = style"
+								><span
+									class="finder-glyph inner"
+									:class="`finder-inner-${style}`"
+									aria-hidden="true"
+									><i><b></b></i></span
+								><span class="choice-name">{{ styleLabel(style) }}</span></button
+							></div
+						></fieldset
+					>
+					<fieldset class="control-group"
+						><legend
+							><span class="micro-label">Ink pattern</span
+							><span class="control-hint">Add a little movement</span></legend
+						><div class="choice-grid pattern-grid"
+							><button
+								v-for="pattern in patterns"
+								:key="pattern"
+								type="button"
+								class="choice-card pattern-card"
+								:class="{ selected: selectedPattern === pattern }"
+								:aria-pressed="selectedPattern === pattern"
+								@click="selectedPattern = pattern"
+								><span
+									class="pattern-glyph"
+									:class="`pattern-${pattern}`"
+									aria-hidden="true"
+								></span
+								><span class="choice-name">{{ styleLabel(pattern) }}</span></button
+							></div
+						><p class="control-note"
+							>Patterns use both ink colors. Keep both dark enough to preserve
+							scanning.</p
+						></fieldset
+					>
+					<div v-if="selectedPattern === 'linear'" class="pattern-angle">
+						<label for="pattern-angle"
+							><span class="micro-label">Gradient direction</span
+							><strong>{{ patternAngle }}°</strong></label
+						>
+						<input
+							id="pattern-angle"
+							v-model.number="patternAngle"
+							type="range"
+							min="0"
+							max="360"
+							step="1"
+							aria-describedby="pattern-angle-help"
+						/>
+						<p id="pattern-angle-help">Drag to rotate the linear ink across the code.</p>
+					</div>
+					<div class="finder-colors"
+						><label class="color-field" for="finder-color"
+							><span class="micro-label">Frame color</span
+							><span class="color-input-wrap"
+								><input id="finder-color" v-model="finderColor" type="color" /><code>{{
+									finderColor
+								}}</code></span
+							></label
+						><label class="color-field" for="finder-inner-color"
+							><span class="micro-label">Center color</span
+							><span class="color-input-wrap"
+								><input
+									id="finder-inner-color"
+									v-model="finderInnerColor"
+									type="color"
+								/><code>{{ finderInnerColor }}</code></span
+							></label
+						></div
+					>
+				</section>
 
 				<div class="divider"></div>
-				<div class="panel-heading compact"
-					><div
-						><p class="step-label">03 / Brand mark</p
-						><h2>Put your logo in the middle</h2></div
-					><span v-if="logoSrc" class="active-label">Added</span></div
-				>
-				<p class="field-help logo-help"
-					>Use a simple, high-contrast mark for the most reliable scans.</p
-				>
-				<div class="logo-row"
-					><div v-if="logoSrc" class="logo-preview" aria-label="Uploaded logo preview"
-						><img :src="logoSrc" alt="Uploaded brand logo" /></div
-					><label v-else class="upload-drop" for="logo-file"
-						><span class="upload-plus" aria-hidden="true">+</span
-						><span
-							><strong>Upload a logo</strong><small>PNG, JPG, SVG, or WebP</small></span
-						></label
-					><div v-if="logoSrc" class="logo-file-info"
-						><strong>{{ logoName }}</strong
-						><button type="button" class="text-button" @click="removeLogo"
-							>Remove</button
+
+				<section aria-labelledby="output-title">
+					<div class="panel-heading compact"
+						><div
+							><p class="step-label">03 / Output</p
+							><h2 id="output-title">Tune the finish</h2></div
 						></div
-					><input
-						id="logo-file"
-						ref="logoInput"
-						class="visually-hidden"
-						type="file"
-						accept="image/png,image/jpeg,image/svg+xml,image/webp"
-						@change="handleLogoChange"
-				/></div>
-				<p v-if="logoError" class="feedback error" role="alert">{{ logoError }}</p>
+					>
+					<div class="output-grid"
+						><label class="select-field" for="output-size"
+							><span class="micro-label">Resolution</span
+							><select id="output-size" v-model.number="outputSize"
+								><option v-for="size in outputSizes" :key="size" :value="size"
+									>{{ size }} × {{ size }} px</option
+								></select
+							></label
+						><fieldset class="control-group correction-group"
+							><legend><span class="micro-label">Scan resilience</span></legend
+							><div class="correction-options"
+								><button
+									v-for="level in errorLevels"
+									:key="level"
+									type="button"
+									:disabled="Boolean(logoSrc) && level !== 'H'"
+									:class="{ selected: effectiveCorrection === level }"
+									:aria-pressed="effectiveCorrection === level"
+									@click="setCorrection(level)"
+									>{{ level }}</button
+								></div
+							></fieldset
+						></div
+					>
+					<p class="field-help">{{
+						logoSrc
+							? 'A logo uses the strongest correction level automatically.'
+							: 'Higher correction can help decorative designs, at the cost of a denser code.'
+					}}</p>
+				</section>
+
+				<div class="divider"></div>
+
+				<section aria-labelledby="logo-title">
+					<div class="panel-heading compact"
+						><div
+							><p class="step-label">04 / Brand mark</p
+							><h2 id="logo-title">Put your logo in the middle</h2></div
+						><span v-if="logoSrc" class="active-label">Added</span></div
+					>
+					<p class="field-help logo-help"
+						>Use a simple, high-contrast mark for the most reliable scans.</p
+					>
+					<div class="logo-row"
+						><div v-if="logoSrc" class="logo-preview" aria-label="Uploaded logo preview"
+							><img :src="logoSrc" alt="Uploaded brand logo" /></div
+						><label v-else class="upload-drop" for="logo-file"
+							><span class="upload-plus" aria-hidden="true">+</span
+							><span
+								><strong>Upload a logo</strong><small>PNG, JPG, SVG, or WebP</small></span
+							></label
+						><div v-if="logoSrc" class="logo-file-info"
+							><strong>{{ logoName }}</strong
+							><button type="button" class="text-button" @click="removeLogo"
+								>Remove</button
+							></div
+						><input
+							id="logo-file"
+							ref="logoInput"
+							class="visually-hidden"
+							type="file"
+							accept="image/png,image/jpeg,image/svg+xml,image/webp"
+							@change="handleLogoChange"
+					/></div>
+					<div v-if="logoSrc" class="logo-scale"
+						><label for="logo-scale"
+							><span class="micro-label">Logo size</span
+							><strong>{{ Math.round(logoScale * 100) }}%</strong></label
+						><input
+							id="logo-scale"
+							v-model.number="logoScale"
+							type="range"
+							min="0.1"
+							max="0.2"
+							step="0.01"
+					/></div>
+					<p v-if="logoError" class="feedback error" role="alert">{{ logoError }}</p>
+				</section>
+
 				<button
 					class="download-button"
 					type="button"
@@ -146,7 +371,7 @@
 				>
 			</div>
 
-			<aside class="preview-panel" aria-labelledby="preview-title">
+			<aside ref="previewPanel" class="preview-panel" aria-labelledby="preview-title">
 				<div class="preview-topline"
 					><div
 						><p class="step-label">Live preview</p
@@ -177,6 +402,16 @@
 						}}</p></div
 					></div
 				>
+				<div class="preview-style-line"
+					><span
+						class="preview-style-dot"
+						:class="`dot-${dotStyle}`"
+						aria-hidden="true"
+					></span
+					><span>{{ styleSummary }}</span
+					><span aria-hidden="true">·</span
+					><span>{{ styleLabel(selectedPattern) }} ink</span></div
+				>
 				<div class="scan-guide"
 					><div class="scan-guide-icon" aria-hidden="true">✓</div
 					><div
@@ -189,7 +424,8 @@
 				>
 				<dl class="preview-details"
 					><div><dt>Output</dt><dd>PNG</dd></div
-					><div><dt>Resolution</dt><dd>512 × 512</dd></div
+					><div
+						><dt>Resolution</dt><dd>{{ outputSize }} × {{ outputSize }}</dd></div
 					><div><dt>Privacy</dt><dd>On device</dd></div></dl
 				>
 			</aside>
@@ -202,15 +438,29 @@
 </template>
 
 <script setup lang="ts">
-import type { RenderOptions } from 'coolqr'
+import type {
+	ColorPattern,
+	DotStyle,
+	FinderInnerStyle,
+	FinderStyle,
+	RenderOptions,
+} from 'coolqr'
 
+type Pattern = ColorPattern
+type Correction = NonNullable<RenderOptions['errorCorrectionLevel']>
 type Example = {
 	label: string
 	icon: string
 	data: string
-	dot: 'square' | 'rounded' | 'circle'
-	eye: 'square' | 'rounded'
+	dot: DotStyle
+	eye: FinderStyle
+	pattern: Pattern
+	palette: string
 }
+type Palette = Pick<
+	RenderOptions,
+	'foreground' | 'accent' | 'background' | 'finderColor' | 'finderInnerColor' | 'pattern'
+> & { label: string }
 
 const data = ref('https://example.com')
 const preview = ref('')
@@ -220,14 +470,60 @@ const logoName = ref('')
 const logoSrc = ref('')
 const status = ref<'idle' | 'generating' | 'ready' | 'error'>('generating')
 const canvasHost = ref<HTMLDivElement | null>(null)
+const previewPanel = ref<HTMLElement | null>(null)
 const logoInput = ref<HTMLInputElement | null>(null)
 const rendered = ref<HTMLCanvasElement | undefined>()
-const dotStyles: NonNullable<RenderOptions['dotStyle']>[] = [
+const dotStyles: DotStyle[] = [
 	'square',
 	'rounded',
 	'circle',
+	'diamond',
+	'hexagon',
+	'octagon',
 ]
-const finderStyles: NonNullable<RenderOptions['finderStyle']>[] = ['square', 'rounded']
+const finderStyles: FinderStyle[] = ['square', 'rounded', 'circle']
+const finderInnerStyles: FinderInnerStyle[] = ['square', 'rounded', 'circle', 'diamond']
+const patterns: Pattern[] = ['solid', 'linear', 'radial', 'checker']
+const outputSizes = [512, 1024, 2048]
+const errorLevels: Correction[] = ['L', 'M', 'Q', 'H']
+const palettes: Palette[] = [
+	{
+		label: 'Ink & paper',
+		foreground: '#17191d',
+		accent: '#17191d',
+		background: '#ffffff',
+		finderColor: '#17191d',
+		finderInnerColor: '#17191d',
+		pattern: 'solid',
+	},
+	{
+		label: 'Moss studio',
+		foreground: '#173c2c',
+		accent: '#2f6b4f',
+		background: '#f4f8f1',
+		finderColor: '#173c2c',
+		finderInnerColor: '#2f6b4f',
+		pattern: 'linear',
+	},
+	{
+		label: 'Indigo dusk',
+		foreground: '#20245d',
+		accent: '#4549a3',
+		background: '#f4f4ff',
+		finderColor: '#20245d',
+		finderInnerColor: '#4549a3',
+		pattern: 'radial',
+	},
+	{
+		label: 'Berry pop',
+		foreground: '#651d43',
+		accent: '#9d3264',
+		background: '#fff5f9',
+		finderColor: '#651d43',
+		finderInnerColor: '#9d3264',
+		pattern: 'checker',
+	},
+]
 const examples: Example[] = [
 	{
 		label: 'Portfolio',
@@ -235,6 +531,8 @@ const examples: Example[] = [
 		data: 'https://example.com/portfolio',
 		dot: 'rounded',
 		eye: 'rounded',
+		pattern: 'linear',
+		palette: 'Moss studio',
 	},
 	{
 		label: 'Wi-Fi setup',
@@ -242,46 +540,119 @@ const examples: Example[] = [
 		data: 'WIFI:T:WPA;S:Studio Guest;P:hello-coolqr;;',
 		dot: 'circle',
 		eye: 'square',
+		pattern: 'solid',
+		palette: 'Ink & paper',
 	},
 	{
 		label: 'Event invite',
 		icon: '✦',
 		data: 'You are invited! Friday at 19:00. Bring a friend.',
-		dot: 'rounded',
-		eye: 'rounded',
+		dot: 'diamond',
+		eye: 'circle',
+		pattern: 'radial',
+		palette: 'Indigo dusk',
 	},
 ]
+const selectedPalette = ref('Ink & paper')
 const options = ref<RenderOptions>({
 	size: 512,
-	foreground: '#16181d',
+	foreground: '#17191d',
+	accent: '#17191d',
 	background: '#ffffff',
 	dotStyle: 'rounded',
 	finderStyle: 'rounded',
+	finderInnerStyle: 'square',
+	finderColor: '#17191d',
+	finderInnerColor: '#17191d',
+	pattern: 'solid',
+	patternAngle: 45,
+	errorCorrectionLevel: 'M',
+})
+const outputSize = computed({
+	get: () => options.value.size ?? 512,
+	set: (size: number) => {
+		options.value.size = size
+	},
 })
 const inkColor = computed({
-	get: () => options.value.foreground ?? '#16181d',
+	get: () => options.value.foreground ?? '#17191d',
 	set: (color: string) => {
+		selectedPalette.value = ''
 		options.value.foreground = color
+	},
+})
+const accentColor = computed({
+	get: () => options.value.accent ?? '#17191d',
+	set: (color: string) => {
+		selectedPalette.value = ''
+		options.value.accent = color
 	},
 })
 const backgroundColor = computed({
 	get: () => options.value.background ?? '#ffffff',
 	set: (color: string) => {
+		selectedPalette.value = ''
 		options.value.background = color
+	},
+})
+const finderColor = computed({
+	get: () => options.value.finderColor ?? inkColor.value,
+	set: (color: string) => {
+		selectedPalette.value = ''
+		options.value.finderColor = color
+	},
+})
+const finderInnerColor = computed({
+	get: () => options.value.finderInnerColor ?? finderColor.value,
+	set: (color: string) => {
+		selectedPalette.value = ''
+		options.value.finderInnerColor = color
 	},
 })
 const dotStyle = computed({
 	get: () => options.value.dotStyle ?? 'rounded',
-	set: (style: RenderOptions['dotStyle']) => {
+	set: (style: DotStyle) => {
 		options.value.dotStyle = style
 	},
 })
 const finderStyle = computed({
 	get: () => options.value.finderStyle ?? 'rounded',
-	set: (style: RenderOptions['finderStyle']) => {
+	set: (style: FinderStyle) => {
 		options.value.finderStyle = style
 	},
 })
+const finderInnerStyle = computed({
+	get: () => options.value.finderInnerStyle ?? 'square',
+	set: (style: FinderInnerStyle) => {
+		options.value.finderInnerStyle = style
+	},
+})
+const selectedPattern = computed({
+	get: () => options.value.pattern ?? 'solid',
+	set: (pattern: Pattern) => {
+		selectedPalette.value = ''
+		options.value.pattern = pattern
+	},
+})
+const patternAngle = computed({
+	get: () => options.value.patternAngle ?? 45,
+	set: (angle: number) => {
+		selectedPalette.value = ''
+		options.value.patternAngle = angle
+	},
+})
+const effectiveCorrection = computed(
+	() => (logoSrc.value ? 'H' : (options.value.errorCorrectionLevel ?? 'M')) as Correction,
+)
+const logoScale = computed({
+	get: () => options.value.logo?.scale ?? 0.16,
+	set: (scale: number) => {
+		if (options.value.logo) options.value.logo.scale = scale
+	},
+})
+const styleSummary = computed(
+	() => `${styleLabel(dotStyle.value)} · ${styleLabel(finderStyle.value)} frame`,
+)
 const statusLabel = computed(
 	() =>
 		(
@@ -295,6 +666,8 @@ const statusLabel = computed(
 )
 let renderSequence = 0
 let logoObjectUrl = ''
+let renderTimer: ReturnType<typeof setTimeout> | undefined
+let correctionBeforeLogo: Correction | undefined
 type RenderFunction = (
 	data: string,
 	options?: RenderOptions,
@@ -315,10 +688,11 @@ async function getRenderFunction() {
 async function render() {
 	const sequence = ++renderSequence
 	canvasHost.value?.replaceChildren()
+	rendered.value?.remove()
 	rendered.value = undefined
-	preview.value = ''
 	renderError.value = ''
 	if (!data.value.trim()) {
+		preview.value = ''
 		status.value = 'idle'
 		return
 	}
@@ -337,6 +711,7 @@ async function render() {
 	} catch (error) {
 		if (sequence !== renderSequence) return
 		status.value = 'error'
+		preview.value = ''
 		renderError.value =
 			error instanceof Error ? error.message : 'Unable to generate a QR code.'
 	}
@@ -345,9 +720,26 @@ function applyExample(example: Example) {
 	data.value = example.data
 	dotStyle.value = example.dot
 	finderStyle.value = example.eye
+	selectedPattern.value = example.pattern
+	const palette = palettes.find(candidate => candidate.label === example.palette)
+	if (palette) applyPalette(palette)
+}
+function applyPalette(palette: Palette) {
+	selectedPalette.value = palette.label
+	options.value = { ...options.value, ...palette }
+}
+function paletteStyle(palette: Palette) {
+	return {
+		'--palette-ink': palette.foreground,
+		'--palette-accent': palette.accent,
+		'--palette-paper': palette.background,
+	}
 }
 function styleLabel(style: string) {
 	return style.replace(/^./, letter => letter.toUpperCase())
+}
+function setCorrection(level: Correction) {
+	if (!logoSrc.value) options.value.errorCorrectionLevel = level
 }
 function handleLogoChange(event: Event) {
 	const file = (event.target as HTMLInputElement).files?.[0]
@@ -365,12 +757,16 @@ function handleLogoChange(event: Event) {
 	logoObjectUrl = URL.createObjectURL(file)
 	logoSrc.value = logoObjectUrl
 	logoName.value = file.name
+	if (!correctionBeforeLogo) {
+		correctionBeforeLogo = options.value.errorCorrectionLevel ?? 'M'
+	}
 	options.value.logo = {
 		src: logoObjectUrl,
 		scale: 0.16,
 		padding: 8,
 		background: '#ffffff',
 	}
+	options.value.errorCorrectionLevel = 'H'
 }
 function removeLogo() {
 	if (logoObjectUrl) URL.revokeObjectURL(logoObjectUrl)
@@ -379,19 +775,40 @@ function removeLogo() {
 	logoName.value = ''
 	logoError.value = ''
 	options.value.logo = undefined
+	options.value.errorCorrectionLevel = correctionBeforeLogo ?? 'M'
+	correctionBeforeLogo = undefined
 	if (logoInput.value) logoInput.value.value = ''
 }
 function download() {
-	if (!rendered.value || !preview.value) return
+	if (status.value !== 'ready' || !rendered.value || !preview.value) return
 	const link = document.createElement('a')
 	link.download = 'coolqr.png'
 	link.href = rendered.value.toDataURL('image/png')
 	link.click()
 }
+function jumpToPreview() {
+	previewPanel.value?.scrollIntoView({
+		behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+			? 'auto'
+			: 'smooth',
+		block: 'start',
+	})
+}
+function scheduleRender() {
+	if (renderTimer) clearTimeout(renderTimer)
+	renderSequence++
+	if (!data.value.trim()) {
+		void render()
+		return
+	}
+	status.value = 'generating'
+	renderTimer = setTimeout(() => void render(), 90)
+}
 onMounted(() => void render())
-watch([data, options], () => void render(), { deep: true })
+watch([data, options], scheduleRender, { deep: true })
 onBeforeUnmount(() => {
 	renderSequence++
+	if (renderTimer) clearTimeout(renderTimer)
 	rendered.value?.remove()
 	canvasHost.value?.replaceChildren()
 	if (logoObjectUrl) URL.revokeObjectURL(logoObjectUrl)
@@ -429,8 +846,15 @@ button,
 select {
 	cursor: pointer;
 }
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+	outline: 3px solid #bfc1ff;
+	outline-offset: 2px;
+}
 .utility-page {
-	width: min(1120px, calc(100% - 48px));
+	width: min(1160px, calc(100% - 48px));
 	margin: 0 auto;
 	padding: 28px 0 34px;
 }
@@ -482,7 +906,7 @@ select {
 	color: #17191d;
 }
 .page-intro {
-	max-width: 640px;
+	max-width: 700px;
 	padding: 92px 0 42px;
 }
 .eyebrow,
@@ -509,14 +933,18 @@ select {
 	background: #6ea43c;
 }
 .page-intro h1 {
-	max-width: 610px;
+	max-width: 680px;
 	margin: 18px 0 12px;
 	font-size: clamp(2.8rem, 7vw, 5.6rem);
 	letter-spacing: -0.09em;
 	line-height: 0.93;
 }
+.page-intro h1 em {
+	color: #5b5fd1;
+	font-style: normal;
+}
 .intro-copy {
-	max-width: 470px;
+	max-width: 500px;
 	margin: 0;
 	color: #777b76;
 	font-size: 16px;
@@ -524,9 +952,12 @@ select {
 }
 .builder {
 	display: grid;
-	grid-template-columns: minmax(0, 0.93fr) minmax(380px, 1.07fr);
+	grid-template-columns: minmax(0, 1fr) minmax(380px, 0.9fr);
 	align-items: start;
 	gap: 20px;
+}
+.mobile-preview-bar {
+	display: none;
 }
 .form-panel,
 .preview-panel {
@@ -559,13 +990,18 @@ select {
 	line-height: 1.1;
 }
 .counter,
-.active-label {
+.active-label,
+.style-count {
 	color: #999d96;
 	font-size: 11px;
 	font-weight: 700;
 }
 .active-label {
 	color: #82b94d;
+}
+.style-count {
+	align-self: center;
+	color: #5f65cf;
 }
 .field-label {
 	display: block;
@@ -596,7 +1032,8 @@ textarea:focus {
 textarea::placeholder {
 	color: #a5a9a1;
 }
-.field-help {
+.field-help,
+.control-note {
 	margin: 8px 0 0;
 	color: #969a93;
 	font-size: 11px;
@@ -640,15 +1077,95 @@ textarea::placeholder {
 .compact {
 	align-items: center;
 }
-.color-row,
-.select-row {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 11px;
-	margin-top: 19px;
+.control-group {
+	min-width: 0;
+	margin: 24px 0 0;
+	border: 0;
+	padding: 0;
 }
-.select-row {
-	margin-top: 14px;
+.control-group legend {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	width: 100%;
+	padding: 0;
+}
+.control-hint {
+	color: #a0a49c;
+	font-size: 10px;
+}
+.palette-grid {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 8px;
+	margin-top: 11px;
+}
+.palette-card {
+	position: relative;
+	display: grid;
+	gap: 7px;
+	min-width: 0;
+	border: 1px solid #e1e3df;
+	border-radius: 10px;
+	padding: 8px;
+	background: #fff;
+	color: #555a53;
+	font-size: 10px;
+	font-weight: 700;
+	text-align: left;
+}
+.palette-card:hover,
+.palette-card.selected {
+	border-color: #7378dd;
+	box-shadow: 0 0 0 2px #e9e9ff;
+}
+.palette-card.selected {
+	color: #4d52b7;
+}
+.palette-swatch {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+	height: 28px;
+	border-radius: 6px;
+	background: var(--palette-paper);
+}
+.palette-swatch i,
+.palette-swatch b,
+.palette-swatch u {
+	display: block;
+	width: 10px;
+	height: 10px;
+	background: var(--palette-ink);
+}
+.palette-swatch b {
+	border-radius: 50%;
+	background: var(--palette-accent);
+}
+.palette-swatch u {
+	transform: rotate(45deg);
+	width: 8px;
+	height: 8px;
+	background: var(--palette-ink);
+}
+.selected-mark {
+	position: absolute;
+	top: 5px;
+	right: 6px;
+	color: #5b5fd1;
+	font-size: 11px;
+}
+.color-grid,
+.finder-colors,
+.output-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 9px;
+	margin-top: 16px;
+}
+.finder-colors {
+	grid-template-columns: repeat(2, 1fr);
 }
 .color-field,
 .select-field {
@@ -659,15 +1176,17 @@ textarea::placeholder {
 .color-input-wrap {
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: 7px;
+	min-width: 0;
 	border: 1px solid #e1e3df;
 	border-radius: 9px;
-	padding: 6px 9px;
+	padding: 5px 7px;
 	background: #fafaf8;
 }
 .color-input-wrap input {
-	width: 26px;
-	height: 26px;
+	width: 25px;
+	height: 25px;
+	flex: 0 0 25px;
 	padding: 0;
 	border: 0;
 	border-radius: 6px;
@@ -675,11 +1194,179 @@ textarea::placeholder {
 	cursor: pointer;
 }
 .color-input-wrap code {
+	overflow: hidden;
 	color: #62665f;
 	font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 	font-size: 10px;
+	text-overflow: ellipsis;
 }
-select {
+.choice-grid {
+	display: grid;
+	gap: 8px;
+	margin-top: 11px;
+}
+.shape-grid {
+	grid-template-columns: repeat(6, 1fr);
+}
+.finder-grid {
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.choice-card {
+	display: grid;
+	place-items: center;
+	gap: 8px;
+	min-height: 86px;
+	border: 1px solid #e1e3df;
+	border-radius: 10px;
+	padding: 9px 6px 8px;
+	background: #fff;
+	color: #686d65;
+}
+.choice-card:hover,
+.choice-card.selected {
+	border-color: #7378dd;
+	box-shadow: 0 0 0 2px #e9e9ff;
+	color: #4f54c0;
+}
+.choice-name {
+	font-size: 10px;
+	font-weight: 750;
+}
+.dot-glyph {
+	display: grid;
+	grid-template-columns: repeat(3, 7px);
+	gap: 3px;
+	padding: 4px;
+}
+.dot-glyph i {
+	width: 7px;
+	height: 7px;
+	background: currentColor;
+}
+.dot-rounded i {
+	border-radius: 3px;
+}
+.dot-circle i {
+	border-radius: 50%;
+}
+.dot-diamond i {
+	transform: rotate(45deg) scale(0.78);
+}
+.dot-hexagon i {
+	clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+}
+.dot-octagon i {
+	clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
+}
+.finder-glyph {
+	display: grid;
+	place-items: center;
+	width: 42px;
+	height: 42px;
+	border: 7px solid currentColor;
+	background: currentColor;
+}
+.finder-glyph i {
+	display: grid;
+	place-items: center;
+	width: 20px;
+	height: 20px;
+	background: #fff;
+}
+.finder-glyph b {
+	display: block;
+	width: 9px;
+	height: 9px;
+	background: currentColor;
+}
+.finder-rounded,
+.finder-rounded i,
+.finder-rounded b {
+	border-radius: 5px;
+}
+.finder-circle,
+.finder-circle i,
+.finder-circle b {
+	border-radius: 50%;
+}
+.finder-glyph.inner {
+	border-width: 5px;
+}
+.finder-glyph.inner i {
+	width: 25px;
+	height: 25px;
+}
+.finder-glyph.inner b {
+	width: 12px;
+	height: 12px;
+}
+.finder-inner-rounded,
+.finder-inner-rounded i,
+.finder-inner-rounded b {
+	border-radius: 5px;
+}
+.finder-inner-circle,
+.finder-inner-circle i,
+.finder-inner-circle b {
+	border-radius: 50%;
+}
+.finder-inner-diamond b {
+	transform: rotate(45deg) scale(0.8);
+}
+.pattern-grid {
+	grid-template-columns: repeat(4, 1fr);
+}
+.pattern-card {
+	min-height: 77px;
+}
+.pattern-glyph {
+	display: block;
+	width: 52px;
+	height: 27px;
+	border-radius: 5px;
+	background: #17191d;
+}
+.pattern-linear {
+	background: linear-gradient(115deg, #17191d 10%, #5b5fd1 90%);
+}
+.pattern-radial {
+	background: radial-gradient(circle at 70% 35%, #5b5fd1, #17191d 75%);
+}
+.pattern-checker {
+	background: conic-gradient(#17191d 25%, #5b5fd1 0 50%, #17191d 0 75%, #5b5fd1 0) 0 0 /
+		13px 13px;
+}
+.control-note {
+	margin-top: 10px;
+}
+.pattern-angle {
+	margin-top: 15px;
+	border: 1px solid #e5e6e2;
+	border-radius: 10px;
+	padding: 11px 12px 10px;
+	background: #fbfbf9;
+}
+.pattern-angle label {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+.pattern-angle label strong {
+	color: #5b5fd1;
+	font-size: 11px;
+}
+.pattern-angle input {
+	display: block;
+	width: 100%;
+	margin-top: 9px;
+	accent-color: #5b5fd1;
+}
+.pattern-angle p {
+	margin: 6px 0 0;
+	color: #969a93;
+	font-size: 10px;
+}
+.select-field select {
 	width: 100%;
 	min-height: 39px;
 	border: 1px solid #e1e3df;
@@ -690,9 +1377,33 @@ select {
 	color: #454a44;
 	font-size: 12px;
 }
-select:focus {
-	border-color: #7a7fe4;
-	box-shadow: 0 0 0 3px #e6e7ff;
+.correction-group {
+	margin: 0;
+}
+.correction-options {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 5px;
+	margin-top: 8px;
+}
+.correction-options button {
+	min-height: 39px;
+	border: 1px solid #e1e3df;
+	border-radius: 8px;
+	background: #fafaf8;
+	color: #747970;
+	font-size: 11px;
+	font-weight: 800;
+}
+.correction-options button:hover:not(:disabled),
+.correction-options button.selected {
+	border-color: #7378dd;
+	background: #f1f1ff;
+	color: #4f54c0;
+}
+.correction-options button:disabled {
+	cursor: not-allowed;
+	opacity: 0.35;
 }
 .logo-help {
 	margin-top: 9px;
@@ -701,8 +1412,8 @@ select:focus {
 	display: flex;
 	align-items: center;
 	gap: 12px;
-	margin-top: 15px;
 	min-height: 57px;
+	margin-top: 15px;
 }
 .upload-drop {
 	display: flex;
@@ -729,7 +1440,6 @@ select:focus {
 	background: #ececff;
 	color: #5c62c9;
 	font-size: 20px;
-	font-weight: 400;
 }
 .upload-drop strong,
 .upload-drop small {
@@ -784,6 +1494,24 @@ select:focus {
 .text-button:hover {
 	text-decoration: underline;
 }
+.logo-scale {
+	margin-top: 13px;
+}
+.logo-scale label {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+.logo-scale label strong {
+	color: #5b5fd1;
+	font-size: 11px;
+}
+.logo-scale input {
+	display: block;
+	width: 100%;
+	margin-top: 9px;
+	accent-color: #5b5fd1;
+}
 .feedback {
 	margin: 8px 0 0;
 	font-size: 11px;
@@ -810,10 +1538,6 @@ select:focus {
 }
 .download-button:hover:not(:disabled) {
 	background: #494db9;
-}
-.download-button:focus-visible {
-	outline: 3px solid #bfc1ff;
-	outline-offset: 3px;
 }
 .download-button:disabled {
 	cursor: not-allowed;
@@ -933,6 +1657,36 @@ kbd {
 .error-state strong {
 	color: #9e4d54;
 }
+.preview-style-line {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 7px;
+	margin-top: 16px;
+	color: #c5c8c1;
+	font-size: 10px;
+	font-weight: 700;
+}
+.preview-style-dot {
+	width: 10px;
+	height: 10px;
+	background: #d8fb65;
+}
+.preview-style-dot.dot-rounded {
+	border-radius: 4px;
+}
+.preview-style-dot.dot-circle {
+	border-radius: 50%;
+}
+.preview-style-dot.dot-diamond {
+	transform: rotate(45deg) scale(0.8);
+}
+.preview-style-dot.dot-hexagon {
+	clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+}
+.preview-style-dot.dot-octagon {
+	clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
+}
 .scan-guide {
 	display: flex;
 	gap: 10px;
@@ -1009,7 +1763,7 @@ kbd {
 	white-space: nowrap;
 	clip-path: inset(50%);
 }
-@media (max-width: 900px) {
+@media (max-width: 980px) {
 	.builder {
 		grid-template-columns: 1fr;
 	}
@@ -1030,7 +1784,7 @@ kbd {
 		font-size: 11px;
 	}
 	.page-intro {
-		padding: 66px 0 30px;
+		padding: 36px 0 26px;
 	}
 	.page-intro h1 {
 		font-size: clamp(2.8rem, 15vw, 4.4rem);
@@ -1040,9 +1794,87 @@ kbd {
 		padding: 20px;
 		border-radius: 15px;
 	}
-	.color-row,
-	.select-row {
-		gap: 8px;
+	.palette-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+	.shape-grid {
+		grid-template-columns: repeat(3, 1fr);
+	}
+	.finder-grid,
+	.pattern-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+	.color-grid,
+	.output-grid {
+		grid-template-columns: 1fr;
+	}
+	.mobile-preview-bar {
+		display: block;
+		position: sticky;
+		top: 10px;
+		z-index: 4;
+		margin-bottom: 10px;
+	}
+	.mobile-preview-button {
+		display: flex;
+		align-items: center;
+		gap: 11px;
+		width: 100%;
+		min-height: 62px;
+		border: 1px solid rgba(255, 255, 255, 0.14);
+		border-radius: 13px;
+		padding: 7px 11px;
+		background: #1a1d22;
+		color: #fff;
+		text-align: left;
+		box-shadow: 0 10px 24px rgba(15, 18, 22, 0.16);
+	}
+	.mobile-preview-button:hover {
+		border-color: rgba(216, 251, 101, 0.5);
+	}
+	.mobile-preview-thumb {
+		display: grid;
+		place-items: center;
+		width: 46px;
+		height: 46px;
+		flex: 0 0 46px;
+		border-radius: 8px;
+		padding: 4px;
+		background: #fff;
+	}
+	.mobile-preview-thumb img {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+	}
+	.mobile-preview-placeholder {
+		display: block;
+		width: 18px;
+		height: 18px;
+		border: 3px solid #5b5fd1;
+		border-radius: 5px;
+	}
+	.mobile-preview-copy {
+		display: grid;
+		min-width: 0;
+		gap: 3px;
+	}
+	.mobile-preview-copy strong {
+		font-size: 11px;
+		font-weight: 800;
+	}
+	.mobile-preview-copy small {
+		overflow: hidden;
+		color: #a6aba4;
+		font-size: 10px;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.mobile-preview-arrow {
+		margin-left: auto;
+		color: #d8fb65;
+		font-size: 18px;
 	}
 	.preview-stage {
 		min-height: 300px;
@@ -1053,9 +1885,7 @@ kbd {
 	}
 }
 @media (prefers-reduced-motion: reduce) {
-	*,
-	*::before,
-	*::after {
+	* {
 		scroll-behavior: auto !important;
 		transition-duration: 0.01ms !important;
 		animation-duration: 0.01ms !important;

@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.1.0
+
+- Add visual style selection for data dots and both parts of finder patterns in the browser builder.
+- Add geometric data shapes, independent finder colors, and solid, linear, radial, and alternating color patterns to the renderer.
+- Let the builder choose output resolution and tune branded codes while preserving contrast, quiet-zone, and logo safety checks.
+
 ## 3.0.0
 
 - Replace the Konva and third-party QR generator stack with a dependency-free QR Code Model 2 encoder and browser Canvas 2D renderer.

@@ -7,6 +7,12 @@ const options: RenderOptions = {
 	background: '#ffffff',
 	dotStyle: 'rounded',
 	finderStyle: 'rounded',
+	finderInnerStyle: 'diamond',
+	finderColor: '#0f172a',
+	finderInnerColor: '#2563eb',
+	pattern: 'linear',
+	accent: '#2563eb',
+	patternAngle: 32,
 	logo: { src: '/brand.svg', scale: 0.16, padding: 8 },
 }
 const canvas: Promise<HTMLCanvasElement> = renderQR('https://example.com', options)

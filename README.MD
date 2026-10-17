@@ -6,10 +6,10 @@ Create QR codes in your browser, or encode their module matrix in Node.js. CoolQ
 
 ## Use the builder
 
-1. Enter a URL, message, or other text. Try one of the example buttons to see a finished code immediately.
-2. Choose dark ink on a light background and, if you like, a data dot and corner style.
+1. Enter a URL, message, or other text. Try an example to explore a complete design.
+2. Pick data dot, outer corner, and inner corner shapes from the visual tiles. Select a solid color, gradient, or alternating pattern, then tune the colors and gradient direction.
 3. Optionally upload a PNG, JPEG, WebP, or SVG logo. The logo is placed over data modules with high error correction; the builder does not upload the image.
-4. Download the 512 × 512 PNG. Scan the exported image at the size and on the material where it will appear.
+4. Choose the output size and error correction level, then download a PNG. Scan the exported image at the size and on the material where it will appear.
 
 The builder runs QR generation in your browser. Its preview and logo stay on your device. The page makes ordinary requests to load the site itself; this is not a promise of offline operation. A QR code shares whatever text you put in it with anyone who scans it, so review its contents before publishing.
 
@@ -17,15 +17,19 @@ The builder runs QR generation in your browser. Its preview and logo stay on you
 
 - Use a short, stable URL for public links. Long content requires a denser code.
 - Keep all four sides of the light margin visible. CoolQR reserves the QR standard's four-module quiet zone.
-- Use a high-contrast, dark foreground and light background. The renderer requires at least a 4.5:1 contrast ratio.
-- Prefer a simple, small logo. Decorative dots and logos can make a code harder to scan on low-quality screens or print.
+- Use a high-contrast, dark foreground and light background. Every color used for dark modules must meet the renderer's 4.5:1 contrast rule against the background.
+- Prefer a simple, small logo. Decorative dots, patterned color, and logos can make a code harder to scan on low-quality screens or print.
 - Test the downloaded file with more than one camera or scanner before printing in volume.
 
 ## Install the library
 
+The API in this guide is available in this repository's 3.1.0 source. Until that version is published to npm, install directly from this repository:
+
 ```sh
-npm install coolqr
+npm install github:nazmirket/coolqr#master
 ```
+
+Once 3.1.0 or newer is published, `npm install coolqr` will provide the same API.
 
 CoolQR 3 is a breaking change from the previous `CoolQR.draw`/Konva API. Use the named `encodeQR` and `renderQR` functions below. The package entry point is CommonJS with TypeScript declarations; bundlers can consume it in browser applications. `encodeQR` works in Node.js. `renderQR` needs a browser with Canvas 2D.
 
@@ -35,11 +39,16 @@ CoolQR 3 is a breaking change from the previous `CoolQR.draw`/Konva API. Use the
 import { renderQR } from 'coolqr'
 
 const canvas = await renderQR('https://example.com/portfolio', {
-  size: 512,
+  size: 1024,
   foreground: '#18212b',
+  accent: '#0f766e',
   background: '#ffffff',
-  dotStyle: 'rounded',
+  pattern: 'linear',
+  patternAngle: 35,
+  dotStyle: 'hexagon',
   finderStyle: 'rounded',
+  finderInnerStyle: 'circle',
+  finderColor: '#18212b',
 })
 
 document.querySelector('#result')?.replaceChildren(canvas)
@@ -107,16 +116,22 @@ Returns `Promise<HTMLCanvasElement>`. The renderer calls `encodeQR`, includes a 
 | --- | --- | --- |
 | `size` | `512` | Exact square canvas size, integer 64–4096 pixels; must fit at least one pixel per module including quiet zone |
 | `errorCorrectionLevel` | `'M'`, or `'H'` with logo | Error correction level; a logo requires `'H'` |
-| `foreground` | `'#111827'` | Opaque dark CSS color |
+| `foreground` | `'#111827'` | Opaque dark base color for the data modules and default finder color |
+| `accent` | — | Second opaque dark color for a non-solid pattern |
 | `background` | `'#ffffff'` | Opaque light CSS color |
-| `dotStyle` | `'square'` | Data modules: `'square'`, `'rounded'`, or `'circle'` |
-| `finderStyle` | `'square'` | Finder patterns: `'square'` or `'rounded'` |
+| `pattern` | `'solid'` | Data color treatment: `'solid'`, `'linear'`, `'radial'`, or `'checker'` |
+| `patternAngle` | `45` | Linear gradient angle in degrees from 0 to 360 |
+| `dotStyle` | `'square'` | Data modules: `'square'`, `'rounded'`, `'circle'`, `'diamond'`, `'hexagon'`, or `'octagon'` |
+| `finderStyle` | `'square'` | Outer finder frames: `'square'`, `'rounded'`, or `'circle'` |
+| `finderInnerStyle` | `'square'` | Finder centers: `'square'`, `'rounded'`, `'circle'`, or `'diamond'` |
+| `finderColor` | `foreground` | Opaque dark outer finder color |
+| `finderInnerColor` | `finderColor` | Opaque dark finder center color |
 | `logo.src` | — | Data/blob URL or CORS-enabled image URL |
 | `logo.scale` | `0.16` | Image width relative to symbol width; `0.06`–`0.20` |
 | `logo.padding` | Scaled with output size | Clear padding around image in output pixels; at most 5% of canvas size |
-| `logo.background` | `'#ffffff'` | Opaque badge color behind the image |
+| `logo.background` | `'#ffffff'` | Opaque light badge color behind the image; must contrast with each dark color |
 
-The renderer rejects colors that are transparent, reversed, or below 4.5:1 contrast. Logo requests also fail if the chosen code cannot safely fit the badge. An error is preferable to a QR image that looks ready but cannot be trusted.
+The renderer rejects colors that are transparent, reversed, or below 4.5:1 contrast. Gradient endpoints and alternating pattern colors are checked individually. Structural modules outside the three finder patterns remain square and use the base foreground color; the four-module quiet zone remains light. Logo requests also fail if the chosen code cannot safely fit the badge. The guardrails improve reliability, but they cannot guarantee that every decorative code will scan on every camera, surface, or print size.
 
 ### Error handling
 
