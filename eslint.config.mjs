@@ -54,5 +54,9 @@ export default [
 			'n/no-unsupported-features/node-builtins': 'off',
 		},
 	},
+	{
+		files: ['scripts/**/*.mjs'],
+		settings: { node: { version: '>=24.0.0' } },
+	},
 	prettierConfig,
 ]

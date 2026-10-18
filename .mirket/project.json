@@ -8,16 +8,8 @@
     "project-foundation"
   ],
   "skills": [
-    "search-visibility"
-  ],
-  "target_skills": {
-    "claude": [
-      "infrastructure-engineering",
-      "frontend-engineering"
-    ],
-    "codex": [
-      "infrastructure-engineering",
-      "frontend-engineering"
-    ]
-  }
+    "search-visibility",
+    "infrastructure-engineering",
+    "frontend-engineering"
+  ]
 }

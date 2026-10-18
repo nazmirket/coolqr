@@ -10,3 +10,9 @@ demo/.DS_Store
 demo/.nuxt
 demo/.output
 demo/node_modules
+.agents
+.claude
+.mirket
+AGENTS.md
+CLAUDE.md
+scripts/harness.node.mjs

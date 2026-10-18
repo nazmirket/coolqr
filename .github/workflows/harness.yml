@@ -1,0 +1,32 @@
+name: Mirket harness
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  harness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - name: Verify and expose the published harness
+        env:
+          MIRKET_RELEASE: mirket-v1.0.4
+          MIRKET_SHA256: 77e909e53e9536afe8ff5107294aa7cbe71b49a0c59bc72ef58ef868b86f1b9c
+        run: |
+          mkdir -p "$RUNNER_TEMP/mirket-runtime/bin"
+          curl --fail --location --proto '=https' --tlsv1.2 \
+            "https://github.com/codemirket/harness/releases/download/$MIRKET_RELEASE/mirket-x86_64-unknown-linux-gnu" \
+            --output "$RUNNER_TEMP/mirket-runtime/bin/mirket"
+          printf '%s  %s\n' "$MIRKET_SHA256" "$RUNNER_TEMP/mirket-runtime/bin/mirket" | sha256sum --check --strict
+          chmod +x "$RUNNER_TEMP/mirket-runtime/bin/mirket"
+          echo "$RUNNER_TEMP/mirket-runtime/bin" >> "$GITHUB_PATH"
+      - name: Check committed adoption and failure probes
+        run: npm run agents:check
