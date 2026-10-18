@@ -1,8 +1,23 @@
 # CoolQR
 
-Create QR codes in your browser, or encode their module matrix in Node.js. CoolQR 3 has no runtime dependencies. Its QR Code Model 2 encoder and Canvas 2D renderer are written in this package.
+**Custom QR codes for the browser. A dependency-free encoder for TypeScript and Node.js.**
 
-**[Open the QR builder](https://qr.mirket.dev/)** · [View the source](https://github.com/nazmirket/coolqr)
+Create branded QR codes with custom shapes, colors, gradients, and logos, then
+export a PNG. Use the web builder or integrate the QR Code Model 2 encoder and
+Canvas 2D renderer into your own application.
+
+[Open the QR builder](https://qr.mirket.dev/) · [npm package](https://www.npmjs.com/package/coolqr) · [API reference](#api-reference) · [Report an issue](https://github.com/nazmirket/coolqr/issues)
+
+[![CoolQR builder with styling controls and a QR code preview](https://raw.githubusercontent.com/nazmirket/coolqr/master/docs/images/preview.png)](https://qr.mirket.dev/)
+
+## Features
+
+- **No runtime dependencies:** the encoder and renderer are implemented in TypeScript.
+- **Flexible styling:** connected or isolated modules, custom finder shapes, solid colors, gradients, and checker patterns.
+- **Logo support:** add a logo with high error correction and protected function patterns.
+- **Browser rendering:** generate a canvas and export PNG images from 64 to 4096 pixels, subject to the code's module density.
+- **Node.js encoding:** produce a QR matrix without browser globals.
+- **Typed API:** TypeScript declarations ship with the package.
 
 ## Use the builder
 
@@ -29,9 +44,9 @@ Install the published package from npm:
 npm install coolqr
 ```
 
-This guide covers CoolQR 3.2.0 and newer. To try unreleased changes from the repository, install `github:nazmirket/coolqr#master` instead.
+This guide describes the API in CoolQR 3.2.0. See the [changelog](CHANGELOG.MD) for release history.
 
-CoolQR 3 is a breaking change from the previous `CoolQR.draw`/Konva API. Use the named `encodeQR` and `renderQR` functions below. The package entry point is CommonJS with TypeScript declarations; bundlers can consume it in browser applications. `encodeQR` works in Node.js. `renderQR` needs a browser with Canvas 2D.
+Use the named `encodeQR` and `renderQR` functions below. The package entry point is CommonJS with TypeScript declarations; bundlers can consume it in browser applications. `encodeQR` works in Node.js. `renderQR` needs a browser with Canvas 2D.
 
 ### Render and download a PNG
 
@@ -149,13 +164,15 @@ try {
 
 ## Develop and verify
 
-The library lives in `src/` and compiles to `dist/`. The public site is a separate Nuxt project in `demo/`, with a local file dependency on the package. Use pnpm 9.15.9, the version recorded in both manifests:
+The library lives in `src/` and compiles to `dist/`. The public site is a separate Nuxt project in `demo/`, with a local file dependency on the package. Use Node.js 24 and pnpm 9.15.9, the version recorded in both manifests. From a fresh checkout:
 
 ```sh
+git clone https://github.com/nazmirket/coolqr.git
+cd coolqr
 corepack pnpm@9.15.9 install --frozen-lockfile --ignore-scripts
 corepack pnpm@9.15.9 run verify
 
-corepack pnpm@9.15.9 --dir demo install --frozen-lockfile --ignore-scripts
+corepack pnpm@9.15.9 --dir demo install --frozen-lockfile
 corepack pnpm@9.15.9 --dir demo run verify
 corepack pnpm@9.15.9 --dir demo run dev
 ```
@@ -164,21 +181,25 @@ The package gate lints, builds, runs encoder and entry-point tests, and checks a
 
 ### Run the demo container locally
 
-The Compose service binds to loopback. Choose a free port when running a disposable copy:
+Use Podman with a Compose provider. The service binds to loopback; choose a free port when running a disposable copy:
 
 ```sh
-COOLQR_PORT=9492 docker compose -p coolqr-validation up -d --build
+COOLQR_PORT=9492 podman compose -p coolqr-validation up -d --build
 curl --fail http://127.0.0.1:9492/
-docker compose -p coolqr-validation down
+podman compose -p coolqr-validation down
 ```
 
 The production host can use a different Compose provider. Set `COOLQR_PORT` and `COOLQR_IMAGE_TAG` as needed; see `compose.yml`.
 
 ## License
 
-ISC
+[ISC](LICENSE).
 
-## Agent development
+## Contributing
+
+Use [GitHub Issues](https://github.com/nazmirket/coolqr/issues) for bugs and feature proposals. For rendering problems, include the input text, render options, browser, and scanner behavior. Remove private data before sharing a reproduction.
+
+### Agent development
 
 Both Codex Desktop and Claude Desktop Code use the Mirket harness. Follow
 [AGENTS.md](AGENTS.md) for setup, selected expertise, worker routing and
