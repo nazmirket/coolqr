@@ -74,3 +74,11 @@ for (const target of ['.agents', '.claude']) {
 		})
 	}
 }
+
+test('the installed harness matches the reviewed CI release', () => {
+	const version = read('.github/workflows/harness.yml').match(/MIRKET_RELEASE: mirket-v(\d+\.\d+\.\d+)/)?.[1]
+	assert.ok(version, 'the published release pin is required')
+	const runtime = spawnSync('mirket', ['--version'], { encoding: 'utf8' })
+	assert.equal(runtime.status, 0, runtime.stderr)
+	assert.equal(runtime.stdout.trim(), `mirket ${version}`, 'Run mirket update and synchronize the project before continuing')
+})
