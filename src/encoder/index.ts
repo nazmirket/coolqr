@@ -11,13 +11,13 @@
 
 export type ErrorCorrectionLevel = 'L' | 'M' | 'Q' | 'H'
 
-export interface EncodeQROptions {
+export interface EncodeOptions {
 	errorCorrectionLevel?: ErrorCorrectionLevel
 	minVersion?: number
 	maxVersion?: number
 }
 
-export interface EncodedQR {
+export interface QRMatrix {
 	size: number
 	modules: Uint8Array
 	functionModules: Uint8Array
@@ -25,11 +25,6 @@ export interface EncodedQR {
 	errorCorrectionLevel: ErrorCorrectionLevel
 	mask: number
 }
-
-// Public aliases kept deliberately close to the encoder contract so the
-// package entry point can expose a concise API without leaking internals.
-export type EncodeOptions = EncodeQROptions
-export type QRMatrix = EncodedQR
 
 type Mode = 'numeric' | 'alphanumeric' | 'byte'
 
@@ -678,7 +673,7 @@ function buildMatrix(
 	}
 }
 
-export function encodeQR(data: string, options: EncodeQROptions = {}): EncodedQR {
+export function encodeQR(data: string, options: EncodeOptions = {}): QRMatrix {
 	if (typeof data !== 'string') throw new RangeError('QR data must be a string')
 	if (data.length === 0) throw new RangeError('QR data must not be empty')
 	for (let offset = 0; offset < data.length; offset++) {

@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Align agent instructions and checksum-pinned CI with Mirket 1.0.5, including
+  frozen visual targets, quality gates and the no-image-model fallback.
+- Use the public `EncodeOptions` and `QRMatrix` interfaces directly throughout
+  the encoder; remove duplicate internal type names and empty dependency config.
+
 ## 3.2.0
 
 - Add connected and individual module compositions. Connected contours join neighboring dark modules while keeping light cells open.

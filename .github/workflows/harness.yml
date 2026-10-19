@@ -19,8 +19,8 @@ jobs:
           package-manager-cache: false
       - name: Verify and expose the published harness
         env:
-          MIRKET_RELEASE: mirket-v1.0.4
-          MIRKET_SHA256: 77e909e53e9536afe8ff5107294aa7cbe71b49a0c59bc72ef58ef868b86f1b9c
+          MIRKET_RELEASE: mirket-v1.0.5
+          MIRKET_SHA256: 02cf2bb96e724fc3dc9ff3ae390500a95f71e2ec4b9ad38cad7ff6744df6bcf6
         run: |
           mkdir -p "$RUNNER_TEMP/mirket-runtime/bin"
           curl --fail --location --proto '=https' --tlsv1.2 \

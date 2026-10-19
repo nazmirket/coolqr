@@ -36,7 +36,6 @@
 		"qr-code"
 	],
 	"license": "ISC",
-	"dependencies": {},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
 		"@types/node": "^24.0.0",

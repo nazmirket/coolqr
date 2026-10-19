@@ -29,11 +29,11 @@ mirket setup --target all --yes
 mirket project init --project "$PWD" --target all
 mirket project plan --project "$PWD"
 mirket project sync --project "$PWD" --prune
-mirket doctor --project "$PWD"
+mirket project doctor --project "$PWD"
 ```
 
-The reviewed release is [mirket-v1.0.4](https://github.com/codemirket/harness/releases/tag/mirket-v1.0.4),
-published 2026-10-18T14:26:16Z. Resolve future releases by publication time,
+The reviewed release is [mirket-v1.0.5](https://github.com/codemirket/harness/releases/tag/mirket-v1.0.5),
+published 2026-10-19T07:23:26Z. Resolve future releases by publication time,
 not the largest historical version. Use `mirket update --check` to inspect and
 `mirket update` to update; synchronize and verify each affected project afterward.
 Update the CI release and SHA-256 together from the published asset metadata.
@@ -67,6 +67,20 @@ preview `route_task`. Declare only actual deliverables in `task_needs`; use
 scope. Read the resolved guidance and verification contract and integrate the
 actual output. Native host tools and native subagents remain host-owned;
 Mirket does not intercept them or grant additional permissions.
+
+Design work follows image-to-code. Read the installed `interface-design`
+`references/image-to-code.md` contract. Inspect a supplied target or create one
+with the host image model before implementation. If no usable image model is
+available, compose a minimal version directly in code, render and inspect it,
+then freeze that composition before expanding it. Retain the target, provenance
+and viewport/state so comparisons are reproducible. Gate composition, typography,
+assets, responsive layout, behavior and requested motion against the frozen
+target; a still image cannot prove animation. Inspect normal-motion frames and
+reduced-motion behavior. Allow at most two correction rounds and ten minutes
+per bounded composition; report unresolved defects at the limit. Do not restart
+sample campaigns to reset the budget. Use the project's application gates below
+for implementation evidence; tool readiness and screenshots alone are not
+acceptance.
 
 For Mirket design production, use the single `design` package's reported
 workspace and compile Style Dictionary tokens first. Route live UI to
