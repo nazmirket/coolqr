@@ -1,8 +1,18 @@
 /** The QR Code Model 2 error-correction level. */
 export type ErrorCorrectionLevel = 'L' | 'M' | 'Q' | 'H'
 
-/** Shape of every dark module outside the three finder patterns. */
-export type DotStyle = 'square' | 'rounded' | 'circle' | 'diamond' | 'hexagon' | 'octagon'
+/** Shape of dark data modules. Scanner landmarks remain square. */
+export type DotStyle =
+	| 'square'
+	| 'rounded'
+	| 'circle'
+	| 'diamond'
+	| 'hexagon'
+	| 'octagon'
+	| 'squircle'
+	| 'leaf'
+	| 'horizontal'
+	| 'vertical'
 
 /** Whether neighboring dark modules share one contour or remain individual marks. */
 export type DotLayout = 'connected' | 'isolated'
@@ -16,15 +26,15 @@ export type FinderInnerStyle = 'square' | 'rounded' | 'circle' | 'diamond'
 /** The color treatment used for dark modules outside the finder patterns. */
 export type ColorPattern = 'solid' | 'linear' | 'radial' | 'checker'
 
-/** A small image placed over data modules with a solid backing. */
+/** A small image placed in a module cutout that follows its visible pixels. */
 export interface QRLogo {
 	/** Data URL, blob URL, or CORS-enabled image URL. */
 	src: string
-	/** Width as a fraction of the QR symbol, excluding its quiet zone. Default 0.16; maximum 0.2. */
+	/** Longest image side as a fraction of the QR symbol, excluding its quiet zone. Default 0.16; maximum 0.2. */
 	scale?: number
-	/** Clear space around the image, in output pixels. Default 8. */
+	/** Clear space around visible image pixels, in output pixels. Default max(3, round(size / 64)). */
 	padding?: number
-	/** Opaque badge color. Default is white. */
+	/** Optional opaque light badge color. Omit to preserve the QR background and image transparency. */
 	background?: string
 }
 
@@ -38,7 +48,7 @@ export interface RenderOptions {
 	foreground?: string
 	/** CSS color for the background and quiet zone. Default #ffffff. */
 	background?: string
-	/** Shape of dark modules outside the finder patterns. Default square. */
+	/** Shape of dark data modules. Scanner landmarks remain square. Default square. */
 	dotStyle?: DotStyle
 	/** Connected contours or individual marks. Default connected. */
 	dotLayout?: DotLayout

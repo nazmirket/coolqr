@@ -1,12 +1,11 @@
 import { encodeQR } from './encoder'
-import type { QRMatrix } from './encoder'
+import { prepareLogo, validateLogo } from './logo'
 import type {
 	ColorPattern,
 	DotLayout,
 	DotStyle,
 	FinderInnerStyle,
 	FinderStyle,
-	QRLogo,
 	RenderOptions,
 } from './types'
 
@@ -20,6 +19,10 @@ const DOT_STYLES: readonly DotStyle[] = [
 	'diamond',
 	'hexagon',
 	'octagon',
+	'squircle',
+	'leaf',
+	'horizontal',
+	'vertical',
 ]
 const DOT_LAYOUTS: readonly DotLayout[] = ['connected', 'isolated']
 const FINDER_STYLES: readonly FinderStyle[] = ['square', 'rounded', 'circle']
@@ -115,7 +118,7 @@ function validateColors(
 			)
 		}
 	}
-	if (logoBackground) {
+	if (logoBackground !== undefined) {
 		const badge = getColor(ctx, logoBackground)
 		if (badge[3] !== 255) throw new RangeError('Logo background must be opaque')
 		const badgeLum = luminance(badge)
@@ -158,6 +161,20 @@ function drawShape(
 	height: number,
 	style: DotStyle | FinderStyle | FinderInnerStyle,
 ): void {
+	if (
+		style === 'squircle' ||
+		style === 'leaf' ||
+		style === 'horizontal' ||
+		style === 'vertical'
+	) {
+		drawConnectedContour(ctx, x, y, width, height, style, {
+			top: false,
+			right: false,
+			bottom: false,
+			left: false,
+		})
+		return
+	}
 	if (style === 'square') {
 		ctx.fillRect(x, y, width, height)
 		return
@@ -223,10 +240,6 @@ interface ModuleNeighbors {
 	right: boolean
 	bottom: boolean
 	left: boolean
-	topLeft: boolean
-	topRight: boolean
-	bottomRight: boolean
-	bottomLeft: boolean
 }
 
 function drawConnectedContour(
@@ -242,84 +255,67 @@ function drawConnectedContour(
 		ctx.fillRect(x, y, width, height)
 		return
 	}
-	if (style === 'circle' || style === 'diamond' || style === 'hexagon') {
-		// Every bridge stays inside its own dark cell. The neighboring cell draws
-		// the other half, so light modules and finder separators remain untouched.
-		const bridgeRatio = style === 'circle' ? 0.8 : style === 'diamond' ? 0.55 : 0.66
-		const bridgeWidth = width * bridgeRatio
-		const bridgeHeight = height * bridgeRatio
-		const cornerRatio = style === 'circle' ? 0.42 : 0.34
-		const cornerWidth = width * cornerRatio
-		const cornerHeight = height * cornerRatio
-		// A fully dark 2x2 intersection has no pinhole in its center.
-		if (neighbors.top && neighbors.left && neighbors.topLeft)
-			ctx.fillRect(x, y, cornerWidth, cornerHeight)
-		if (neighbors.top && neighbors.right && neighbors.topRight)
-			ctx.fillRect(x + width - cornerWidth, y, cornerWidth, cornerHeight)
-		if (neighbors.bottom && neighbors.right && neighbors.bottomRight)
-			ctx.fillRect(
-				x + width - cornerWidth,
-				y + height - cornerHeight,
-				cornerWidth,
-				cornerHeight,
-			)
-		if (neighbors.bottom && neighbors.left && neighbors.bottomLeft)
-			ctx.fillRect(x, y + height - cornerHeight, cornerWidth, cornerHeight)
-		if (neighbors.left || neighbors.right) {
-			ctx.fillRect(
-				neighbors.left ? x : x + width / 2,
-				y + (height - bridgeHeight) / 2,
-				(neighbors.left && neighbors.right ? 1 : 0.5) * width,
-				bridgeHeight,
-			)
+	if (style === 'horizontal') {
+		const inset = height * 0.08
+		if (!neighbors.top) {
+			y += inset
+			height -= inset
 		}
-		if (neighbors.top || neighbors.bottom) {
-			ctx.fillRect(
-				x + (width - bridgeWidth) / 2,
-				neighbors.top ? y : y + height / 2,
-				bridgeWidth,
-				(neighbors.top && neighbors.bottom ? 1 : 0.5) * height,
-			)
+		if (!neighbors.bottom) height -= inset
+	}
+	if (style === 'vertical') {
+		const inset = width * 0.08
+		if (!neighbors.left) {
+			x += inset
+			width -= inset
 		}
-		drawShape(ctx, x, y, width, height, style)
-		return
+		if (!neighbors.right) width -= inset
 	}
-	const topLeft = !neighbors.top && !neighbors.left
-	const topRight = !neighbors.top && !neighbors.right
-	const bottomRight = !neighbors.bottom && !neighbors.right
-	const bottomLeft = !neighbors.bottom && !neighbors.left
-	if (style === 'rounded') {
-		const radius = Math.min(width, height) * 0.32
-		const tl = topLeft ? radius : 0
-		const tr = topRight ? radius : 0
-		const br = bottomRight ? radius : 0
-		const bl = bottomLeft ? radius : 0
-		ctx.beginPath()
-		ctx.moveTo(x + tl, y)
-		ctx.lineTo(x + width - tr, y)
-		ctx.quadraticCurveTo(x + width, y, x + width, y + tr)
-		ctx.lineTo(x + width, y + height - br)
-		ctx.quadraticCurveTo(x + width, y + height, x + width - br, y + height)
-		ctx.lineTo(x + bl, y + height)
-		ctx.quadraticCurveTo(x, y + height, x, y + height - bl)
-		ctx.lineTo(x, y + tl)
-		ctx.quadraticCurveTo(x, y, x + tl, y)
-		ctx.closePath()
-		ctx.fill()
-		return
+	// Only exposed corners are shaped. Shared edges stay flush, so straight
+	// runs, elbows and solid 2x2 blocks form one silhouette without bridge seams.
+	const exposed = [
+		!neighbors.top && !neighbors.left,
+		!neighbors.top && !neighbors.right,
+		!neighbors.bottom && !neighbors.right,
+		!neighbors.bottom && !neighbors.left,
+	]
+	const curved = !['diamond', 'hexagon', 'octagon'].includes(style)
+	if (style === 'leaf') {
+		exposed[1] = false
+		exposed[3] = false
 	}
-	// Octagon facets shape the exposed silhouette of the cluster, not every cell.
-	const cut = Math.min(width, height) * 0.18
-	polygon(ctx, [
-		[x + (topLeft ? cut : 0), y],
-		[x + width - (topRight ? cut : 0), y],
-		[x + width, y + (topRight ? cut : 0)],
-		[x + width, y + height - (bottomRight ? cut : 0)],
-		[x + width - (bottomRight ? cut : 0), y + height],
-		[x + (bottomLeft ? cut : 0), y + height],
-		[x, y + height - (bottomLeft ? cut : 0)],
-		[x, y + (topLeft ? cut : 0)],
+	const ratioX =
+		style === 'squircle'
+			? 0.16
+			: style === 'rounded'
+				? 0.32
+				: style === 'hexagon'
+					? 0.25
+					: style === 'octagon'
+						? 0.2
+						: 0.5
+	const ratioY = style === 'hexagon' ? 0.5 : ratioX
+	const corners = exposed.map(value => [
+		value ? width * ratioX : 0,
+		value ? height * ratioY : 0,
 	])
+	const [tl, tr, br, bl] = corners
+	ctx.beginPath()
+	ctx.moveTo(x + tl[0], y)
+	ctx.lineTo(x + width - tr[0], y)
+	if (curved) ctx.quadraticCurveTo(x + width, y, x + width, y + tr[1])
+	else ctx.lineTo(x + width, y + tr[1])
+	ctx.lineTo(x + width, y + height - br[1])
+	if (curved) ctx.quadraticCurveTo(x + width, y + height, x + width - br[0], y + height)
+	else ctx.lineTo(x + width - br[0], y + height)
+	ctx.lineTo(x + bl[0], y + height)
+	if (curved) ctx.quadraticCurveTo(x, y + height, x, y + height - bl[1])
+	else ctx.lineTo(x, y + height - bl[1])
+	ctx.lineTo(x, y + tl[1])
+	if (curved) ctx.quadraticCurveTo(x, y, x + tl[0], y)
+	else ctx.lineTo(x + tl[0], y)
+	ctx.closePath()
+	ctx.fill()
 }
 
 function drawDataModule(
@@ -447,107 +443,6 @@ function loadLogo(src: string): Promise<HTMLImageElement> {
 	})
 }
 
-interface LogoPlacement {
-	column: number
-	row: number
-	span: number
-}
-
-function findLogoPlacement(qr: QRMatrix, span: number): LogoPlacement {
-	const middle = (qr.size - 1) / 2
-	const reach = Math.max(8, Math.ceil(qr.size * 0.18))
-	let best: LogoPlacement | undefined
-	let bestScore = Infinity
-	for (
-		let row = Math.max(4, Math.floor(middle - span / 2 - reach));
-		row <= Math.min(qr.size - span - 4, Math.ceil(middle - span / 2 + reach));
-		row++
-	) {
-		for (
-			let column = Math.max(4, Math.floor(middle - span / 2 - reach));
-			column <= Math.min(qr.size - span - 4, Math.ceil(middle - span / 2 + reach));
-			column++
-		) {
-			let safe = true
-			for (let y = row; y < row + span && safe; y++) {
-				for (let x = column; x < column + span; x++) {
-					if (qr.functionModules[y * qr.size + x]) {
-						safe = false
-						break
-					}
-				}
-			}
-			if (!safe) continue
-			const dx = column + span / 2 - qr.size / 2
-			const dy = row + span / 2 - qr.size / 2
-			const score = dx * dx + dy * dy
-			if (score < bestScore) {
-				bestScore = score
-				best = { column, row, span }
-			}
-		}
-	}
-	if (!best)
-		throw new RangeError(
-			'No safe logo area fits this QR code; reduce logo scale or padding',
-		)
-	return best
-}
-
-function drawLogo(
-	ctx: CanvasRenderingContext2D,
-	qr: QRMatrix,
-	edge: (index: number) => number,
-	logo: QRLogo,
-	image: HTMLImageElement,
-	canvasSize: number,
-): void {
-	const scale = logo.scale ?? 0.16
-	if (!Number.isFinite(scale) || scale < 0.06 || scale > 0.2) {
-		throw new RangeError('Logo scale must be between 0.06 and 0.2')
-	}
-	const padding = logo.padding ?? Math.max(3, Math.round(canvasSize / 64))
-	if (!Number.isFinite(padding) || padding < 0 || padding > canvasSize * 0.05) {
-		throw new RangeError('Logo padding must be between 0 and 5% of canvas size')
-	}
-	const symbolPixels = edge(QUIET_ZONE + qr.size) - edge(QUIET_ZONE)
-	const imageSide = symbolPixels * scale
-	const badgeSide = imageSide + padding * 2
-	if (badgeSide > symbolPixels * 0.25) {
-		throw new RangeError('Logo and padding cover too much of the QR symbol')
-	}
-	const modulePixels = symbolPixels / qr.size
-	const span = Math.ceil(badgeSide / modulePixels) + 1
-	const placement = findLogoPlacement(qr, span)
-	const cellLeft = edge(QUIET_ZONE + placement.column)
-	const cellTop = edge(QUIET_ZONE + placement.row)
-	const cellRight = edge(QUIET_ZONE + placement.column + span)
-	const cellBottom = edge(QUIET_ZONE + placement.row + span)
-	const badgeX = cellLeft + (cellRight - cellLeft - badgeSide) / 2
-	const badgeY = cellTop + (cellBottom - cellTop - badgeSide) / 2
-	ctx.fillStyle = logo.background ?? '#ffffff'
-	ctx.beginPath()
-	roundedRect(
-		ctx,
-		badgeX,
-		badgeY,
-		badgeSide,
-		badgeSide,
-		Math.min(modulePixels, badgeSide * 0.16),
-	)
-	ctx.fill()
-	const fit = Math.min(imageSide / image.naturalWidth, imageSide / image.naturalHeight)
-	const width = image.naturalWidth * fit
-	const height = image.naturalHeight * fit
-	ctx.drawImage(
-		image,
-		badgeX + padding + (imageSide - width) / 2,
-		badgeY + padding + (imageSide - height) / 2,
-		width,
-		height,
-	)
-}
-
 /**
  * Render a QR symbol into a self-contained browser canvas. The caller owns the canvas.
  * A quiet zone and structural patterns are preserved even when data dots are styled.
@@ -556,8 +451,15 @@ export async function renderQR(
 	data: string,
 	options: RenderOptions = {},
 ): Promise<HTMLCanvasElement> {
-	if (typeof document === 'undefined' || typeof Image === 'undefined') {
+	if (typeof document === 'undefined') {
 		throw new Error('renderQR requires a browser with Canvas 2D support')
+	}
+	if (!options || typeof options !== 'object')
+		throw new RangeError('QR options must be an object')
+	// Callers may change reactive options while an image is loading.
+	options = {
+		...options,
+		...(options.logo !== undefined ? { logo: { ...options.logo } } : {}),
 	}
 	const size = options.size ?? DEFAULT_SIZE
 	if (!Number.isInteger(size) || size < 64 || size > 4096) {
@@ -612,12 +514,19 @@ export async function renderQR(
 	]
 	if (pattern !== 'solid') darkColors.push({ name: 'accent', value: accent })
 	validateColors(background, darkColors, options.logo?.background)
+	if (options.logo) {
+		validateLogo(options.logo, size)
+		if (typeof Image === 'undefined')
+			throw new Error('Logo rendering requires a browser Image implementation')
+	}
 	const image = options.logo ? await loadLogo(options.logo.src) : undefined
 	const canvas = document.createElement('canvas')
 	canvas.width = canvas.height = size
 	const ctx = canvas.getContext('2d', { willReadFrequently: false })
 	if (!ctx) throw new Error('Canvas 2D is unavailable')
 	const edge = (index: number) => Math.round((index * size) / totalModules)
+	const logo =
+		image && options.logo ? prepareLogo(qr, edge, options.logo, image, size) : undefined
 	ctx.fillStyle = background
 	ctx.fillRect(0, 0, size, size)
 	const symbolStart = edge(QUIET_ZONE)
@@ -637,11 +546,13 @@ export async function renderQR(
 		row < qr.size &&
 		column < qr.size &&
 		qr.modules[row * qr.size + column] === 1 &&
+		!logo?.removed[row * qr.size + column] &&
 		!isFinder(row, column, qr.size)
 	for (let row = 0; row < qr.size; row++) {
 		for (let column = 0; column < qr.size; column++) {
 			const offset = row * qr.size + column
-			if (!qr.modules[offset] || isFinder(row, column, qr.size)) continue
+			if (!qr.modules[offset] || logo?.removed[offset] || isFinder(row, column, qr.size))
+				continue
 			if (pattern === 'checker') {
 				// Larger ink blocks preserve the sense of a continuous cluster.
 				ctx.fillStyle =
@@ -653,15 +564,17 @@ export async function renderQR(
 			const y = edge(QUIET_ZONE + row)
 			const width = edge(QUIET_ZONE + column + 1) - x
 			const height = edge(QUIET_ZONE + row + 1) - y
+			// Timing, alignment and metadata are scanner landmarks, not decorative dots.
+			if (qr.functionModules[offset]) {
+				ctx.fillStyle = foreground
+				ctx.fillRect(x, y, width, height)
+				continue
+			}
 			drawDataModule(ctx, x, y, width, height, dotStyle, dotLayout, {
 				top: darkOutsideFinder(row - 1, column),
 				right: darkOutsideFinder(row, column + 1),
 				bottom: darkOutsideFinder(row + 1, column),
 				left: darkOutsideFinder(row, column - 1),
-				topLeft: darkOutsideFinder(row - 1, column - 1),
-				topRight: darkOutsideFinder(row - 1, column + 1),
-				bottomRight: darkOutsideFinder(row + 1, column + 1),
-				bottomLeft: darkOutsideFinder(row + 1, column - 1),
 			})
 		}
 	}
@@ -698,6 +611,17 @@ export async function renderQR(
 		finderInnerColor,
 		background,
 	)
-	if (image && options.logo) drawLogo(ctx, qr, edge, options.logo, image, size)
+	if (logo) {
+		if (options.logo?.background !== undefined) {
+			ctx.fillStyle = options.logo.background
+			ctx.fillRect(
+				logo.x - logo.padding,
+				logo.y - logo.padding,
+				logo.image.width + logo.padding * 2,
+				logo.image.height + logo.padding * 2,
+			)
+		}
+		ctx.drawImage(logo.image, logo.x, logo.y)
+	}
 	return canvas
 }

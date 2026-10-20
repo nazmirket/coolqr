@@ -1,4 +1,10 @@
-import { encodeQR, renderQR, type QRMatrix, type RenderOptions } from '../dist/index'
+import {
+	encodeQR,
+	renderQR,
+	type QRMatrix,
+	type RenderOptions,
+	type DotStyle,
+} from '../dist/index'
 
 const matrix: QRMatrix = encodeQR('https://example.com', { errorCorrectionLevel: 'Q' })
 const options: RenderOptions = {
@@ -20,3 +26,6 @@ const canvas: Promise<HTMLCanvasElement> = renderQR('https://example.com', optio
 
 void matrix
 void canvas
+
+const styles: DotStyle[] = ['squircle', 'leaf', 'horizontal', 'vertical']
+void styles

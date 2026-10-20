@@ -180,7 +180,7 @@
 					<fieldset class="control-group"
 						><legend
 							><span class="micro-label">Module silhouette</span
-							><span class="control-hint">Shape every dark mark</span></legend
+							><span class="control-hint">Shape the data dots</span></legend
 						><div class="choice-grid shape-grid"
 							><button
 								v-for="style in dotStyles"
@@ -353,7 +353,8 @@
 						><span v-if="logoSrc" class="active-label">Added</span></div
 					>
 					<p class="field-help logo-help"
-						>Use a simple, high-contrast mark for the most reliable scans.</p
+						>Use a transparent mark for a shaped cutout. Only the dots beneath the mark
+						and its padding are removed.</p
 					>
 					<div class="logo-row"
 						><div v-if="logoSrc" class="logo-preview" aria-label="Uploaded logo preview"
@@ -520,6 +521,10 @@ const dotStyles: DotStyle[] = [
 	'diamond',
 	'hexagon',
 	'octagon',
+	'squircle',
+	'leaf',
+	'horizontal',
+	'vertical',
 ]
 const dotLayouts: DotLayout[] = ['connected', 'isolated']
 const finderStyles: FinderStyle[] = ['square', 'rounded', 'circle']
@@ -861,7 +866,6 @@ function handleLogoChange(event: Event) {
 		src: logoObjectUrl,
 		scale: 0.16,
 		padding: 8,
-		background: '#ffffff',
 	}
 	options.value.errorCorrectionLevel = 'H'
 }
@@ -1816,6 +1820,20 @@ kbd {
 }
 .preview-style-dot.dot-octagon {
 	clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
+}
+.preview-style-dot.dot-squircle {
+	border-radius: 2px;
+}
+.preview-style-dot.dot-leaf {
+	border-radius: 50% 0;
+}
+.preview-style-dot.dot-horizontal {
+	height: 7px;
+	border-radius: 50%;
+}
+.preview-style-dot.dot-vertical {
+	width: 7px;
+	border-radius: 50%;
 }
 .scan-guide {
 	display: flex;

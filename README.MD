@@ -44,7 +44,7 @@ Install the published package from npm:
 npm install coolqr
 ```
 
-This guide describes the API in CoolQR 3.2.0. See the [changelog](CHANGELOG.MD) for release history.
+This guide describes the API in CoolQR 3.3.0. See the [changelog](CHANGELOG.MD) for release history.
 
 Use the named `encodeQR` and `renderQR` functions below. The package entry point is CommonJS with TypeScript declarations; bundlers can consume it in browser applications. `encodeQR` works in Node.js. `renderQR` needs a browser with Canvas 2D.
 
@@ -88,14 +88,19 @@ const canvas = await renderQR('https://example.com', {
     src: '/brand-mark.png',
     scale: 0.16,
     padding: 8,
-    background: '#ffffff',
   },
 })
 
 document.querySelector('#result')?.replaceChildren(canvas)
 ```
 
-Supplying `logo` automatically selects error correction level **H**. An explicit lower level is rejected. The image must be a data URL, blob URL, same-origin URL, or a remote URL that permits CORS. CoolQR rejects an image that fails to load and rejects a badge that cannot fit without covering QR function patterns. Catch the error and ask the user to choose a smaller image or remove the logo; it will not silently produce an unbranded code. For an uploaded file, create a blob URL with `URL.createObjectURL(file)` and revoke it after the canvas is ready and no longer needed.
+Supplying `logo` automatically selects error correction level **H**. An explicit lower level is rejected. The image must be a data URL, blob URL, same-origin URL, or a remote URL that permits CORS. CoolQR rejects an image that fails to load and rejects a logo footprint that cannot fit without covering QR function patterns. Catch the error and ask the user to choose a smaller image or remove the logo; it will not silently produce an unbranded code. For an uploaded file, create a blob URL with `URL.createObjectURL(file)` and revoke it after the canvas is ready and no longer needed.
+
+By default, CoolQR removes only whole data modules intersecting the logo's visible pixels and padding, then draws the image without adding a white background. Transparent areas retain the QR background and any unaffected dots. Connected contours adapt to the cutout. Wide and tall logos retain their aspect ratio. A white background already present in an uploaded image remains part of that image; use a transparent PNG, WebP, or SVG for a shaped cutout. Set `logo.background` explicitly to opt into a rectangular badge.
+
+### Shape families
+
+The ten styles work in both layouts. Connected styles shape the outer edges of dark clusters, keeping shared edges flush and solid blocks free of pinholes. `squircle` has restrained soft corners, `leaf` rounds opposite corners, and `horizontal` / `vertical` introduce directional capsule marks. Timing and alignment patterns stay square even with decorative data dots.
 
 ### Encode without a browser
 
@@ -126,7 +131,7 @@ The result contains `size`, `version`, `errorCorrectionLevel`, `mask`, `modules`
 
 ### `renderQR(data, options?)`
 
-Returns `Promise<HTMLCanvasElement>`. The renderer calls `encodeQR`, includes a four-module light quiet zone, and styles every dark module outside the three separately drawn finder patterns. It requires Canvas 2D and a browser `Image` implementation when a logo is used. Failures reject the promise.
+Returns `Promise<HTMLCanvasElement>`. The renderer calls `encodeQR`, includes a four-module light quiet zone, and styles data modules and draws scanner landmarks separately. It requires Canvas 2D and a browser `Image` implementation when a logo is used. Failures reject the promise.
 
 | Option | Default | Meaning |
 | --- | --- | --- |
@@ -137,18 +142,18 @@ Returns `Promise<HTMLCanvasElement>`. The renderer calls `encodeQR`, includes a 
 | `background` | `'#ffffff'` | Opaque light CSS color |
 | `pattern` | `'solid'` | Module color treatment: `'solid'`, `'linear'`, `'radial'`, or `'checker'` |
 | `patternAngle` | `45` | Linear gradient angle in degrees from 0 to 360 |
-| `dotStyle` | `'square'` | Module silhouette: `'square'`, `'rounded'`, `'circle'`, `'diamond'`, `'hexagon'`, or `'octagon'` |
+| `dotStyle` | `'square'` | Module silhouette: `'square'`, `'rounded'`, `'circle'`, `'diamond'`, `'hexagon'`, `'octagon'`, `'squircle'`, `'leaf'`, `'horizontal'`, or `'vertical'` |
 | `dotLayout` | `'connected'` | `'connected'` joins dark neighbors into contours; `'isolated'` draws individual marks (square marks have a small gap) |
 | `finderStyle` | `'square'` | Outer finder frames: `'square'`, `'rounded'`, or `'circle'` |
 | `finderInnerStyle` | `'square'` | Finder centers: `'square'`, `'rounded'`, `'circle'`, or `'diamond'` |
 | `finderColor` | `foreground` | Opaque dark outer finder color |
 | `finderInnerColor` | `finderColor` | Opaque dark finder center color |
 | `logo.src` | — | Data/blob URL or CORS-enabled image URL |
-| `logo.scale` | `0.16` | Image width relative to symbol width; `0.06`–`0.20` |
+| `logo.scale` | `0.16` | Longest image side relative to symbol width; `0.06`–`0.20` |
 | `logo.padding` | Scaled with output size | Clear padding around image in output pixels; at most 5% of canvas size |
-| `logo.background` | `'#ffffff'` | Opaque light badge color behind the image; must contrast with each dark color |
+| `logo.background` | None | Optional opaque light badge; omit for a cutout following image transparency |
 
-The renderer rejects colors that are transparent, reversed, or below 4.5:1 contrast. Gradient endpoints and checker colors are checked individually. Connected shapes join only cardinally adjacent dark modules and never enter light cells; the four-module quiet zone remains light. Timing, alignment, format, and version modules use the selected silhouette and ink while retaining their encoded dark/light values. Finder frames remain a separate locator layer. Logo requests also fail if the chosen code cannot safely fit the badge. These guardrails improve reliability, but they cannot guarantee that every decorative code will scan on every camera, surface, or print size.
+The renderer rejects colors that are transparent, reversed, or below 4.5:1 contrast. Gradient endpoints and checker colors are checked individually. Connected shapes join only cardinally adjacent dark modules and never enter light cells; the four-module quiet zone remains light. Timing, alignment, format, and version modules remain square in the foreground color to protect scanner recognition. Finder frames remain a separate locator layer. Logo requests also fail if the chosen code cannot safely fit the logo. These guardrails improve reliability, but they cannot guarantee that every decorative code will scan on every camera, surface, or print size.
 
 ### Error handling
 

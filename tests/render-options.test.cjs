@@ -13,6 +13,8 @@ class FakeContext {
 	fillRectCalls = 0
 	filledPathPoints = []
 	pathPoints = 0
+	coordinates = []
+	imageCalls = 0
 
 	get fillStyle() {
 		return this._fillStyle
@@ -36,11 +38,13 @@ class FakeContext {
 
 	closePath() {}
 
-	moveTo() {
+	moveTo(...args) {
+		this.coordinates.push(args)
 		this.pathPoints++
 	}
 
-	lineTo() {
+	lineTo(...args) {
+		this.coordinates.push(args)
 		this.pathPoints++
 	}
 
@@ -87,7 +91,9 @@ class FakeContext {
 		}
 	}
 
-	drawImage() {}
+	drawImage() {
+		this.imageCalls++
+	}
 }
 
 class FakeCanvas {
@@ -123,7 +129,7 @@ function isFinder(row, column, size) {
 	)
 }
 
-test('styles every non-finder dark module and joins adjacent circles', async () => {
+test('styles data modules while preserving square scanner landmarks', async () => {
 	const data = 'https://example.com/coolqr'
 	const qr = encodeQR(data)
 	const darkCells = []
@@ -136,9 +142,15 @@ test('styles every non-finder dark module and joins adjacent circles', async () 
 	assert.ok(darkCells.some(cell => cell.function))
 	const isolated = await renderQR(data, { dotStyle: 'circle', dotLayout: 'isolated' })
 	const connected = await renderQR(data, { dotStyle: 'circle', dotLayout: 'connected' })
-	assert.equal(isolated.context.ellipseStyles.length, darkCells.length)
-	assert.equal(connected.context.ellipseStyles.length, darkCells.length)
-	assert.ok(connected.context.fillRectCalls > isolated.context.fillRectCalls)
+	assert.equal(
+		isolated.context.ellipseStyles.length,
+		darkCells.filter(cell => !cell.function).length,
+	)
+	assert.equal(
+		connected.context.filledPathPoints.length,
+		darkCells.filter(cell => !cell.function).length,
+	)
+	assert.equal(connected.context.fillRectCalls, isolated.context.fillRectCalls)
 
 	const checker = await renderQR(data, {
 		dotStyle: 'circle',
@@ -147,8 +159,7 @@ test('styles every non-finder dark module and joins adjacent circles', async () 
 		foreground: '#111827',
 		accent: '#1e40af',
 	})
-	for (const [index, cell] of darkCells.entries()) {
-		if (!cell.function) continue
+	for (const [index, cell] of darkCells.filter(cell => !cell.function).entries()) {
 		const expected =
 			(Math.floor(cell.row / 3) + Math.floor(cell.column / 3)) % 2 === 0
 				? '#111827'
@@ -181,16 +192,35 @@ test('renders every creative pattern and shape family through the canvas API', a
 })
 
 test('connected polygon families retain distinct silhouettes', async () => {
-	for (const [style, vertices] of [
-		['diamond', 4],
-		['hexagon', 6],
-		['octagon', 8],
-	]) {
-		const canvas = await renderQR('https://example.com/coolqr', {
-			dotStyle: style,
-			dotLayout: 'connected',
-		})
-		assert.deepEqual([...new Set(canvas.context.filledPathPoints)], [vertices])
+	const signatures = []
+	for (const style of ['diamond', 'hexagon', 'octagon']) {
+		const canvas = await renderQR('https://example.com/coolqr', { dotStyle: style })
+		signatures.push(JSON.stringify(canvas.context.coordinates))
+	}
+	assert.equal(new Set(signatures).size, 3)
+})
+
+test('new styles support both layouts and reject invalid options before loading images', async () => {
+	for (const dotStyle of ['squircle', 'leaf', 'horizontal', 'vertical'])
+		for (const dotLayout of ['connected', 'isolated']) {
+			const canvas = await renderQR('hello', { dotStyle, dotLayout })
+			assert.ok(canvas.context.filledPathPoints.length > 0)
+		}
+	await assert.rejects(renderQR('hello', null), /options must be an object/)
+	await assert.rejects(
+		renderQR('hello', { logo: { src: 'unused', scale: NaN } }),
+		/Logo scale/,
+	)
+	await assert.rejects(
+		renderQR('hello', { logo: { src: 'unused', background: '' } }),
+		/Invalid QR color/,
+	)
+	const Image = global.Image
+	delete global.Image
+	try {
+		assert.ok(await renderQR('hello'))
+	} finally {
+		global.Image = Image
 	}
 })
 
@@ -230,4 +260,13 @@ test('rejects low contrast creative colors and invalid pattern angles', async ()
 		}),
 		/QR logo background must be lighter/,
 	)
+})
+
+test('in-flight renders retain their logo when callers edit the options object', async () => {
+	const options = { logo: { src: 'fixture', scale: 0.16 } }
+	const pending = renderQR('hello', options)
+	options.logo.scale = 0.9
+	options.logo = undefined
+	const canvas = await pending
+	assert.equal(canvas.context.imageCalls, 1)
 })

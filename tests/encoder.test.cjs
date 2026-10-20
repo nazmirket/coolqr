@@ -117,3 +117,19 @@ test('rejects invalid options and payload overflow with RangeError', () => {
 		message: /does not fit/,
 	})
 })
+
+test('mask balance penalizes equal departures above and below 50% equally', () => {
+	const { penalty } = require('../dist/encoder/penalty.js')
+	// Contiguous rows avoid finder-like patterns; inversion preserves run and block costs.
+	for (const dark of [210, 220, 230, 242, 260, 300]) {
+		const modules = new Uint8Array(21 * 21)
+		modules.fill(1, 0, dark)
+		assert.equal(
+			penalty(modules, 21),
+			penalty(
+				modules.map(value => 1 - value),
+				21,
+			),
+		)
+	}
+})

@@ -1,6 +1,17 @@
 # Changelog
 
-## Unreleased
+## 3.3.0 — 2026-10-20
+
+- Remove only whole data modules beneath visible logo pixels and padding by default;
+  retain transparent areas, image aspect ratio, and the QR background. Set
+  `logo.background` explicitly to retain an opaque rectangular badge.
+- Shape exposed cluster edges instead of overlaying rectangular bridges, and add
+  squircle, leaf, horizontal, and vertical dot styles in both library and demo.
+- Keep timing, alignment, format, and version modules square and solid for scanner
+  recognition; finder styling remains independently configurable.
+- Correct asymmetric dark/light balance scoring when choosing a QR mask.
+- Snapshot rendering options before asynchronous image loading, validate logo
+  geometry before loading, and allow rendering without `Image` when no logo is used.
 
 - Align agent instructions and checksum-pinned CI with Mirket 1.0.5, including
   frozen visual targets, quality gates and the no-image-model fallback.
