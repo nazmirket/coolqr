@@ -3,7 +3,8 @@ import fs from 'node:fs'
 import vm from 'node:vm'
 import { createHash } from 'node:crypto'
 import ts from 'typescript'
-import { encodeQR } from '../dist/index.js'
+// This optional check runs after build; dist is absent during clean-checkout lint.
+const { encodeQR } = await import(new URL('../dist/index.js', import.meta.url).href)
 
 // External reference stays outside the production package and dependency graph.
 // See docs/verification.md for the reviewed source and its provenance.
