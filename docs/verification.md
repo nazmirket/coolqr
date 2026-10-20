@@ -253,8 +253,10 @@ quiet zones, and logo exclusion rules are preserved.
   [Mirket CI](https://github.com/nazmirket/coolqr/actions/runs/39407111530) passed.
 - npm tarball `coolqr-3.3.1.tgz` SHA-1 is
   `f1c258ac2cc0ad3cc91081b0880fa067cad0b4c5`. Extracted `dist/` files match the tested
-  build byte-for-byte and the public package entrypoint was exercised. At this
-  checkpoint npm publication is waiting for the account's web authentication.
+  build byte-for-byte and the public package entrypoint was exercised. After web
+  authentication, npm publication completed successfully. Registry version 3.3.1
+  and the `latest` tag are confirmed; both registry SHA-1 and SHA-512 integrity
+  match the tested tarball. Tag `v3.3.1` identifies the release source above.
 - Source archive SHA-256:
   `df3940206da4109bda441fec651307e4831495aa50bf3691e599f489439e8fe8`.
   Server image `coolqr-demo:48c4772`:
