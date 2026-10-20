@@ -132,3 +132,41 @@ already present in a supplied logo are retained; this does not perform backgroun
 removal on JPEGs. All logo placement remains conservative about function patterns.
 The encoder still chooses one mode per payload rather than optimizing mixed-mode
 segments; this is a size-efficiency opportunity, not a demonstrated encoding error.
+
+## 3.3.0 release and production deployment — 2026-10-20
+
+- Release source and `v3.3.0` tag: `06b29471d55f72081a2f25a0c781c8436fdf3bdb`.
+  The initial release commit is `8e4e915`; the follow-up fixes the optional reference
+  script's import of generated files during clean-checkout lint. Verification was
+  repeated with `dist/` absent, without weakening the lint rule.
+- [Application CI](https://github.com/nazmirket/coolqr/actions/runs/39397088238) and
+  [harness CI](https://github.com/nazmirket/coolqr/actions/runs/39397088211) passed
+  on the release revision. Local root, demo and pinned-Mirket gates passed.
+- [coolqr 3.3.0](https://www.npmjs.com/package/coolqr/v/3.3.0) was published and
+  confirmed as npm's `latest`. Registry tarball SHA-1
+  `5100baa6ed06276888e6217686bee6997a376247` matches the tested tarball; its extracted
+  public entrypoint reproduces the tested encoder output. No new runtime dependencies.
+- Production source was transferred as a Git archive (SHA-256
+  `1673595937f1ef6a783a23a7710118c92be013b3afda3bbbef8b78b78620d2a3`)
+  and built in `/opt/coolqr/releases/06b2947`. Image
+  `coolqr-demo:06b2947` has immutable identity
+  `sha256:677af2ab3fe42c466eff3b84dbab065b2a1e9a164b9097521acdc21bd570151b`.
+- This image passed an isolated server canary on loopback port 9498: Leaf/Moss
+  selection, transparent SVG upload, PNG download, exact zbar decoding, desktop
+  and 390px mobile without overflow or browser exceptions. The prior image was
+  restored on the canary to rehearse rollback; the new-catalog guard rejected
+  the old image as intended while the prior page remained healthy. The candidate
+  was then restored, preserving its image identity.
+- Promoted that same image to the existing `coolqr` Compose project and port 9491
+  at **2026-10-20T08:59:42Z**. Nginx configuration stayed intact. The `current`
+  symlink and `.deploy-commit` now identify the release revision.
+- [Public site](https://qr.mirket.dev/) returned HTTP 200; the real HTTPS browser
+  journey passed again, and its downloaded PNG decoded to `https://example.com`.
+  Production Docker health is `healthy` and the running image matches the canary.
+  The canary container/network were removed after verification.
+- Rollback image `coolqr-demo:99c55ba8694f` and release directory remain available.
+  On the server, use that directory and run
+  `COOLQR_PORT=9491 COOLQR_IMAGE_TAG=99c55ba8694f docker compose -p coolqr up -d --no-build`,
+  verify the page and QR download, then restore `current` and `.deploy-commit` to
+  `99c55ba8694fedd72162907024c68b3679566618`. No persistent application data migration
+  is involved. Observations cover this rollout, not an ongoing monitoring period.
