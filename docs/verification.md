@@ -28,5 +28,5 @@ Known safe failure: A 1,000-character alphanumeric payload at ECC H cannot fit a
 
 See [the migration record](mirket-migration.md) for the adoption matrix, exact
 release/live identity, application gates, failure/restoration probes, package
-invocation and remaining Claude/GitHub verification gaps. Historical browser
+invocation and remaining Claude live activation gap. Historical browser
 and scanner checks above remain dated evidence, not claims of a new visual run.

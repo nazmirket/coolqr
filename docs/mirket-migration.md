@@ -31,7 +31,7 @@ were current with no conflicts. Existing CI had no application verification.
 | Instructions / onboarding | AGENTS.md, CLAUDE.md, README | Installed guidance | Stale 1.0.5 and duplicated design budget; update release and defer budgets to installed contract | Commands checked against help; no competing instruction owner | verified |
 | Library architecture | src/encoder, Render, index, types | Project foundation | Separate pure encoder and browser renderer; no adoption blocker requiring a rewrite | Lint/build/QR tests/public consumer types, invalid input tests | verified |
 | Demo / dependency tooling | Independent Nuxt project, file dependency | Frontend / infrastructure | CI must build root before installing demo; Development Node requirement claimed but absent in manifests | Frozen installs and demo lint/types/build | verified |
-| CI / release | Harness-only GitHub workflow | CI maintenance | Add application verification; preserve publish as separately authorized action | Same local commands pass; remote runner remains unobserved | pending: GitHub runner; local commands verified |
+| CI / release | Harness-only GitHub workflow | CI maintenance | Add application verification; preserve publish as separately authorized action | Local commands and GitHub workflows pass; see linked runs below | verified |
 | Design packages | Global optional design package | Package probe / direct tool | Verify installed identity separately from invocation; no requested visual redesign | Probe and actual tool invocation; do not infer output quality | verified |
 | Memory / lifecycle | Repository facts and this record | Optional Mem0/LangGraph | Browser library has no persistent server data or resumable agent application; do not introduce a second store | Agent package probe for installed global capability; application integration excluded | not applicable to application |
 | Recovery | Git-owned source and lockfiles | Infrastructure | No durable schema migration; preserve existing registration | Isolated skill fixture restoration and verification | verified |
@@ -49,8 +49,8 @@ A separate CLI/SDK process does not establish activation of an existing session.
 ## Final verification
 
 All commands below were run on macOS ARM64 with Node 24.18.1 and pnpm 9.15.9.
-Linux ARM64 container verification is separate from the unobserved GitHub Linux
-x86-64 runner. Windows application behavior was not exercised.
+Linux ARM64 container verification is separate from the GitHub Linux x86-64
+runner verified below. Windows application behavior was not exercised.
 
 - `mirket doctor --json`, `mirket catalog check`: pass. Doctor also exercised
   malformed input, resource rejection and concurrent MCP requests in its own
@@ -70,7 +70,8 @@ x86-64 runner. Windows application behavior was not exercised.
 - Compose config, disposable image build, health check, HTTP 200 for home/favicon,
   HTTP 404 for `/icon.png`, and HTTP 200 after restart: pass on loopback 9496.
   The validation container and network were removed. No production deployment.
-- `git diff --check`: pass. No commits, pushes or publishing performed.
+- `git diff --check`: pass. Migration changes were subsequently committed and
+  pushed with explicit user authorization; no package publishing performed.
 
 The real Codex `runtime_status` was called before and after the changes. Both
 calls observed process 47872, version 1.0.11, target `aarch64-apple-darwin`, public
@@ -119,6 +120,22 @@ home by replacing only its binary. For future durable migration, inspect
 contract in an isolated supported destination. Project assets and desktop
 settings require their own backups.
 
-The only pending adoption items are the actual Claude session invocation above
-and a GitHub run of the newly added workflows after an authorized push. The
-workflow commands passed locally; remote CI status is not inferred from that.
+The only remaining adoption gap is the actual Claude session invocation above.
+Claude live activation remains **blocked / unverified**; neither the successful
+Codex call nor GitHub CI verifies that connection.
+
+## Authorized push and GitHub verification
+
+Migration commit `d47414e337ab8f3d50b21db7c83cab529b450a43` was pushed to
+`master` with explicit user authorization. Both workflows completed successfully
+for that exact commit:
+
+- [Application, run 39391889177](https://github.com/nazmirket/coolqr/actions/runs/39391889177):
+  frozen installs, library lint/build/tests/types, demo lint/types/build and
+  package dry-run passed.
+- [Mirket harness, run 39391889199](https://github.com/nazmirket/coolqr/actions/runs/39391889199):
+  published Linux binary digest, compiled source/catalog identity, project doctor
+  and failure/restoration probes passed.
+
+No failure repairs were needed. GitHub reported an informational Ubuntu runner
+image migration annotation; neither workflow failed or skipped its checks.
