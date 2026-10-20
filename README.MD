@@ -164,7 +164,7 @@ try {
 
 ## Develop and verify
 
-The library lives in `src/` and compiles to `dist/`. The public site is a separate Nuxt project in `demo/`, with a local file dependency on the package. Use Node.js 24 and pnpm 9.15.9, the version recorded in both manifests. From a fresh checkout:
+The library lives in `src/` and compiles to `dist/`. The public site is a separate Nuxt project in `demo/`, with a local file dependency on the package. Use Node.js 24 (`nvm use`) and pnpm 9.15.9. The root development contract and demo engine requirement record Node 24; both manifests pin pnpm. From a fresh checkout:
 
 ```sh
 git clone https://github.com/nazmirket/coolqr.git
@@ -205,3 +205,22 @@ Both Codex Desktop and Claude Desktop Code use the Mirket harness. Follow
 [AGENTS.md](AGENTS.md) for setup, selected expertise, worker routing and
 application verification. Run `pnpm agents:check` before delivery; the dedicated
 Mirket CI workflow checks the committed integration and real failure probes.
+
+
+The reviewed Mirket release is pinned by platform and content in
+[.mirket/release.json](.mirket/release.json). CI and `agents:check` share this
+identity. The [adoption record](docs/mirket-migration.md) documents provenance,
+verification and the remaining Claude activation check. Application CI builds
+and tests the root before installing and verifying the demo's local dependency.
+
+After a harness update, inspect `mirket project plan --project .`, then use
+`mirket project sync --project . --prune` and `pnpm agents:check`. Inspect changed
+managed files before synchronization; do not overwrite unexplained conflicts.
+Invoke `runtime_status` in each client and compare with `mirket info --json`;
+matching version labels alone are insufficient.
+
+Project facts remain in repository files. No Mem0 or LangGraph application
+integration is needed for this stateless browser library. If future agent work
+needs durable state, use the installed lifecycle guidance and `mirket backup
+--help` before migration. A binary downgrade alone cannot restore newer durable
+state. This migration did not modify durable schemas or restore private data.

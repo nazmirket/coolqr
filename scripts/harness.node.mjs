@@ -12,6 +12,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import test from 'node:test'
+import { verifyIdentity } from './harness-identity.mjs'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
 const read = path => readFileSync(join(root, path), 'utf8')
@@ -68,6 +69,10 @@ for (const target of ['.agents', '.claude']) {
 				assert.equal(broken.status, 1, broken.stderr || broken.stdout)
 				assert.equal(JSON.parse(broken.stdout).ok, false)
 				assert.match(broken.stdout, /conflict|missing|changed|modified|digest/i)
+				cpSync(join(root, target, 'skills/debugging/SKILL.md'), path)
+				const restored = doctor()
+				assert.equal(restored.status, 0, restored.stderr || restored.stdout)
+				assert.equal(JSON.parse(restored.stdout).ok, true)
 			} finally {
 				rmSync(fixture, { recursive: true, force: true })
 			}
@@ -75,16 +80,45 @@ for (const target of ['.agents', '.claude']) {
 	}
 }
 
-test('the installed harness matches the reviewed CI release', () => {
-	const version = read('.github/workflows/harness.yml').match(
-		/MIRKET_RELEASE: mirket-v(\d+\.\d+\.\d+)/,
-	)?.[1]
-	assert.ok(version, 'the published release pin is required')
-	const runtime = spawnSync('mirket', ['--version'], { encoding: 'utf8' })
-	assert.equal(runtime.status, 0, runtime.stderr)
-	assert.equal(
-		runtime.stdout.trim(),
-		`mirket ${version}`,
-		'Run mirket update and synchronize the project before continuing',
-	)
+const release = JSON.parse(read('.mirket/release.json'))
+const info = spawnSync('mirket', ['info', '--json'], { encoding: 'utf8' })
+assert.equal(info.status, 0, info.stderr)
+const runtime = JSON.parse(info.stdout)
+
+test('the executable, source and catalog match the reviewed public release', () => {
+	verifyIdentity(runtime, release)
+})
+
+for (const field of ['executable_sha256', 'source_sha256', 'target']) {
+	test(`same-version runtime with altered ${field} is rejected`, () => {
+		const altered = structuredClone(runtime)
+		altered.process[field] = 'unreviewed'
+		assert.throws(() => verifyIdentity(altered, release))
+	})
+}
+
+test('same-version altered catalog and stale live process are rejected', () => {
+	const altered = structuredClone(runtime)
+	altered.catalog.sha256 = 'unreviewed'
+	assert.throws(() => verifyIdentity(altered, release))
+	const stale = structuredClone(runtime)
+	stale.installed_binary = { matches_process: false, sha256: 'stale' }
+	assert.throws(() => verifyIdentity(stale, release))
+})
+
+test('standalone CI binary is verified without a desktop home installation', () => {
+	const home = mkdtempSync(join(tmpdir(), 'mirket-standalone-'))
+	try {
+		const result = spawnSync('mirket', ['info', '--home', home, '--json'], {
+			encoding: 'utf8',
+		})
+		assert.equal(result.status, 0, result.stderr)
+		const standalone = JSON.parse(result.stdout)
+		assert.equal(standalone.installed_binary.sha256, null)
+		verifyIdentity(standalone, release)
+		standalone.process.executable_sha256 = 'unreviewed'
+		assert.throws(() => verifyIdentity(standalone, release))
+	} finally {
+		rmSync(home, { recursive: true, force: true })
+	}
 })

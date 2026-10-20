@@ -1,0 +1,26 @@
+name: Application
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: corepack enable
+      - run: corepack pnpm@9.15.9 install --frozen-lockfile --ignore-scripts
+      - run: corepack pnpm@9.15.9 verify
+      # The file:.. dependency must contain the freshly built library.
+      - run: corepack pnpm@9.15.9 --dir demo install --frozen-lockfile
+      - run: corepack pnpm@9.15.9 --dir demo verify
+      - run: npm pack --dry-run --ignore-scripts

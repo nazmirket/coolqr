@@ -19,6 +19,12 @@
 		"README.MD"
 	],
 	"packageManager": "pnpm@9.15.9",
+	"devEngines": {
+		"runtime": {
+			"name": "node",
+			"version": "24.x"
+		}
+	},
 	"scripts": {
 		"build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsc",
 		"lint": "eslint .",

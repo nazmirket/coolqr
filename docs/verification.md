@@ -23,3 +23,10 @@ Known safe failure: A 1,000-character alphanumeric payload at ECC H cannot fit a
 - Independent zbarimg 0.23.93 decoded a connected rounded, colored portfolio example and a dense connected diamond PNG to their exact inputs.
 - Browser UI: the Portfolio example reset the full design to Moss palette, connected rounded marks, diamond finder centers and linear ink, and its canvas decoded. Desktop and 390px mobile views were inspected; mobile document scroll width equaled the viewport width.
 - Podman Compose canary: built the current source, served HTTP 200 on loopback port 9492, then was removed.
+
+## Mirket 1.0.11 adoption — 2026-10-20
+
+See [the migration record](mirket-migration.md) for the adoption matrix, exact
+release/live identity, application gates, failure/restoration probes, package
+invocation and remaining Claude/GitHub verification gaps. Historical browser
+and scanner checks above remain dated evidence, not claims of a new visual run.

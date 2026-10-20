@@ -18,10 +18,9 @@ jobs:
           node-version: 24
           package-manager-cache: false
       - name: Verify and expose the published harness
-        env:
-          MIRKET_RELEASE: mirket-v1.0.5
-          MIRKET_SHA256: 02cf2bb96e724fc3dc9ff3ae390500a95f71e2ec4b9ad38cad7ff6744df6bcf6
         run: |
+          MIRKET_RELEASE="mirket-v$(node -p "require('./.mirket/release.json').version")"
+          MIRKET_SHA256="$(node -p "require('./.mirket/release.json').assets.find(a => a.target === 'x86_64-unknown-linux-gnu').sha256")"
           mkdir -p "$RUNNER_TEMP/mirket-runtime/bin"
           curl --fail --location --proto '=https' --tlsv1.2 \
             "https://github.com/codemirket/harness/releases/download/$MIRKET_RELEASE/mirket-x86_64-unknown-linux-gnu" \

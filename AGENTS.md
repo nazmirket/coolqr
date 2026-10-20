@@ -32,11 +32,12 @@ mirket project sync --project "$PWD" --prune
 mirket project doctor --project "$PWD"
 ```
 
-The reviewed release is [mirket-v1.0.5](https://github.com/codemirket/harness/releases/tag/mirket-v1.0.5),
-published 2026-10-19T07:23:26Z. Resolve future releases by publication time,
+The reviewed release is [mirket-v1.0.11](https://github.com/codemirket/harness/releases/tag/mirket-v1.0.11),
+published 2026-10-20T07:01:43Z. Resolve future releases by publication time,
 not the largest historical version. Use `mirket update --check` to inspect and
 `mirket update` to update; synchronize and verify each affected project afterward.
-Update the CI release and SHA-256 together from the published asset metadata.
+Update `.mirket/release.json` from published asset metadata; CI and local checks
+share this pin, including binary, compiled source and embedded catalog hashes.
 Do not substitute an unreviewed source build or bypass a digest mismatch.
 
 Before work, inspect current changes, this guide, affected source owners, the
@@ -69,16 +70,14 @@ actual output. Native host tools and native subagents remain host-owned;
 Mirket does not intercept them or grant additional permissions.
 
 Design work follows image-to-code. Read the installed `interface-design`
-`references/image-to-code.md` contract. Inspect a supplied target or create one
-with the host image model before implementation. If no usable image model is
-available, compose a minimal version directly in code, render and inspect it,
-then freeze that composition before expanding it. Retain the target, provenance
+`references/image-to-code.md` contract. Inspect a supplied target or create a minimal native specimen suited to the
+medium; use the host image model when raster composition helps the deliverable.
+Render and inspect the target, then freeze it before expansion. Retain the target, provenance
 and viewport/state so comparisons are reproducible. Gate composition, typography,
 assets, responsive layout, behavior and requested motion against the frozen
 target; a still image cannot prove animation. Inspect normal-motion frames and
-reduced-motion behavior. Allow at most two correction rounds and ten minutes
-per bounded composition; report unresolved defects at the limit. Do not restart
-sample campaigns to reset the budget. Use the project's application gates below
+reduced-motion behavior. Use the installed medium-specific production budgets and report unresolved
+defects at the limit. Do not restart sample campaigns to reset the budget. Use the project's application gates below
 for implementation evidence; tool readiness and screenshots alone are not
 acceptance.
 
@@ -96,8 +95,10 @@ That harness gate runs the installed doctor plus real missing/tampered-skill
 probes for both targets. CI provisions a digest-verified published Linux CLI
 and checks committed files without synchronizing them first. A green doctor
 does not prove desktop activation, authenticated worker execution or application
-correctness. In a fresh desktop session, invoke a Mirket tool and inspect its
-result before claiming that host is activated.
+correctness. Call `runtime_status` in each actual desktop connection and compare its binary,
+source and catalog hashes with the reviewed pin. Require
+`installed_binary.matches_process: true`; CLI doctor does not prove activation.
+See `docs/mirket-migration.md` for observed evidence and remaining client gaps.
 
 Keep secrets, local host configuration, task/runtime caches and the transient
 `.mirket/project.lock` mutex out of commits. Preserve unrelated work. Commits,
@@ -106,7 +107,7 @@ a role, registration or passing test does not supply it.
 
 ## Application gates
 
-Use Node.js 24 and pnpm 9.15.9 as pinned in both package manifests.
+Use Node.js 24 and pnpm 9.15.9 as declared in the package manifests and `.nvmrc`.
 
 ```sh
 corepack pnpm@9.15.9 install --frozen-lockfile --ignore-scripts
