@@ -175,6 +175,30 @@ const bundle = `const penalty={};((exports)=>{${source('encoder/penalty')}})(pen
 											decoderFallbacks++
 										} else failures.push({ data, ...options, logo: !!logo })
 									}
+				// Guard both sides of the pixel-density boundary: strengthening every
+				// horizontal stroke fixed 320px but regressed the same symbol at 512px.
+				for (const size of [319, 320, 321, 328, 384, 512]) {
+					const data = 'https://example.com/dense?' + 'abc123'.repeat(24)
+					const options = {
+						size,
+						dotStyle: 'horizontal',
+						dotLayout: 'connected',
+						finderStyle: 'circle',
+						finderInnerStyle: 'square',
+						foreground: '#20245d',
+						accent: '#4549a3',
+						background: '#f4f4ff',
+						finderColor: '#20245d',
+						finderInnerColor: '#4549a3',
+					}
+					const canvas = await window.qr.renderQR(data, options)
+					const pixels = canvas.getContext('2d').getImageData(0, 0, size, size).data
+					if (window.jsQR(pixels, size, size)?.data === data) decoded++
+					else if (await window.decodeFallback(canvas.toDataURL(), data)) {
+						decoded++
+						decoderFallbacks++
+					} else failures.push({ data, ...options, logo: false })
+				}
 			}
 			return { decoded, decoderFallbacks, pixelCases, failures }
 		}, process.argv.includes('--full'))

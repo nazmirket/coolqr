@@ -213,3 +213,35 @@ The command deliberately exits nonzero while any case fails; its threshold was n
 relaxed. The visual repair budget is exhausted. Publication and production deployment
 are held pending resolution of this failure. npm and the website remain on 3.3.0;
 no 3.3.1 release or tag was created.
+
+## 3.3.1 release validation — 2026-10-20
+
+The user authorized a further repair and release after the held pass above.
+The remaining failure was a small-pixel horizontal stroke problem: the dense
+53-module symbol decoded at 319px and 321px but failed at 320px. An equal-integer
+module grid fixed that case but introduced ten logo-case failures, so it was
+rejected. Making all horizontal strokes heavier passed the catalog but regressed
+an additional 512px size probe. The accepted correction strengthens horizontal
+strokes only when their module is smaller than six pixels; larger strokes retain
+the tested proportions. Canvas dimensions, encoded matrices, selected silhouettes,
+quiet zones, and logo exclusion rules are preserved.
+
+- The strict expanded sweep now passes **1,626/1,626** images: all ten dot styles,
+  both layouts, all three finder frames and four centers, representative URL,
+  Unicode and dense payloads, 320/512px outputs, four ink patterns, and logo/no-logo
+  cases, plus six focused size probes (319, 320, 321, 328, 384, 512px).
+  Patterns and logo presence are distributed across the cross-style cases;
+  this is not an exhaustive test of every payload or every option permutation.
+- 392 images needed the independent zbar fallback after jsQR. Both decoders must
+  return the exact payload to count a case as passing; no failed cases are skipped.
+  60 pixel-integrity checks and the transparent-logo equality check also pass.
+  [Machine-readable result](images/rendering-review/style-release-results.json).
+- [Previously failing 320px output](images/rendering-review/dense-horizontal.png)
+  was inspected and now decodes with both jsQR and zbar. Its six size probes are
+  included in the permanent `--full` regression command.
+- Root verification (18 tests and type checks), demo lint/typecheck/build,
+  640 independent encoder matrices, and all 11 pinned-Mirket checks pass.
+  The active Codex Mirket process matches the reviewed binary/source/catalog pin
+  and reports `installed_binary.matches_process: true`.
+- Physical camera/print testing and Safari/Firefox remain outside this evidence.
+  The earlier release hold is resolved by these checks; deployment evidence follows.

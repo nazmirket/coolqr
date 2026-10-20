@@ -256,7 +256,8 @@ function drawConnectedContour(
 		return
 	}
 	if (style === 'horizontal') {
-		const inset = height * 0.06
+		// Small modules need heavier strokes to survive pixel quantization.
+		const inset = height * (Math.min(width, height) < 6 ? 0.04 : 0.06)
 		if (!neighbors.top) {
 			y += inset
 			height -= inset
