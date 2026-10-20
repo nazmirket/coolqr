@@ -6,6 +6,10 @@ Create branded QR codes with custom shapes, colors, gradients, and logos, then
 export a PNG. Use the web builder or integrate the QR Code Model 2 encoder and
 Canvas 2D renderer into your own application.
 
+The repository includes an **unreleased style-consistency correction**. npm and
+the hosted builder remain on 3.3.0 while a dense-code scan failure is investigated;
+see [verification results](docs/verification.md#style-consistency-correction--unreleased-2026-10-20).
+
 [Open the QR builder](https://qr.mirket.dev/) · [npm package](https://www.npmjs.com/package/coolqr) · [API reference](#api-reference) · [Report an issue](https://github.com/nazmirket/coolqr/issues)
 
 [![CoolQR builder with styling controls and a QR code preview](https://raw.githubusercontent.com/nazmirket/coolqr/master/docs/images/preview.png)](https://qr.mirket.dev/)
@@ -100,7 +104,7 @@ By default, CoolQR removes only whole data modules intersecting the logo's visib
 
 ### Shape families
 
-The ten styles work in both layouts. Connected styles shape the outer edges of dark clusters, keeping shared edges flush and solid blocks free of pinholes. `squircle` has restrained soft corners, `leaf` rounds opposite corners, and `horizontal` / `vertical` introduce directional capsule marks. Timing and alignment patterns stay square even with decorative data dots.
+The ten styles work in both layouts. Connected styles shape the outer edges of dark clusters, keeping shared edges flush and solid blocks free of pinholes. `squircle` has restrained soft corners, `leaf` rounds opposite corners, and `horizontal` / `vertical` introduce directional capsule marks. Timing and metadata dots use the selected dot style. The smaller alignment targets share the finder frame and center styles, with continuous rings in both dot layouts.
 
 ### Encode without a browser
 
@@ -131,7 +135,7 @@ The result contains `size`, `version`, `errorCorrectionLevel`, `mask`, `modules`
 
 ### `renderQR(data, options?)`
 
-Returns `Promise<HTMLCanvasElement>`. The renderer calls `encodeQR`, includes a four-module light quiet zone, and styles data modules and draws scanner landmarks separately. It requires Canvas 2D and a browser `Image` implementation when a logo is used. Failures reject the promise.
+Returns `Promise<HTMLCanvasElement>`. The renderer calls `encodeQR`, includes a four-module light quiet zone, and styles data, timing and metadata modules and draws finder/alignment targets separately. It requires Canvas 2D and a browser `Image` implementation when a logo is used. Failures reject the promise.
 
 | Option | Default | Meaning |
 | --- | --- | --- |
@@ -144,8 +148,8 @@ Returns `Promise<HTMLCanvasElement>`. The renderer calls `encodeQR`, includes a 
 | `patternAngle` | `45` | Linear gradient angle in degrees from 0 to 360 |
 | `dotStyle` | `'square'` | Module silhouette: `'square'`, `'rounded'`, `'circle'`, `'diamond'`, `'hexagon'`, `'octagon'`, `'squircle'`, `'leaf'`, `'horizontal'`, or `'vertical'` |
 | `dotLayout` | `'connected'` | `'connected'` joins dark neighbors into contours; `'isolated'` draws individual marks (square marks have a small gap) |
-| `finderStyle` | `'square'` | Outer finder frames: `'square'`, `'rounded'`, or `'circle'` |
-| `finderInnerStyle` | `'square'` | Finder centers: `'square'`, `'rounded'`, `'circle'`, or `'diamond'` |
+| `finderStyle` | `'square'` | Finder and alignment rings: `'square'`, `'rounded'`, or `'circle'` |
+| `finderInnerStyle` | `'square'` | Finder and alignment centers: `'square'`, `'rounded'`, `'circle'`, or `'diamond'` |
 | `finderColor` | `foreground` | Opaque dark outer finder color |
 | `finderInnerColor` | `finderColor` | Opaque dark finder center color |
 | `logo.src` | — | Data/blob URL or CORS-enabled image URL |
@@ -153,7 +157,7 @@ Returns `Promise<HTMLCanvasElement>`. The renderer calls `encodeQR`, includes a 
 | `logo.padding` | Scaled with output size | Clear padding around image in output pixels; at most 5% of canvas size |
 | `logo.background` | None | Optional opaque light badge; omit for a cutout following image transparency |
 
-The renderer rejects colors that are transparent, reversed, or below 4.5:1 contrast. Gradient endpoints and checker colors are checked individually. Connected shapes join only cardinally adjacent dark modules and never enter light cells; the four-module quiet zone remains light. Timing, alignment, format, and version modules remain square in the foreground color to protect scanner recognition. Finder frames remain a separate locator layer. Logo requests also fail if the chosen code cannot safely fit the logo. These guardrails improve reliability, but they cannot guarantee that every decorative code will scan on every camera, surface, or print size.
+The renderer rejects colors that are transparent, reversed, or below 4.5:1 contrast. Gradient endpoints and checker colors are checked individually. Connected shapes join only cardinally adjacent dark modules and never enter light cells; the four-module quiet zone remains light. Timing, format, and version modules use the chosen dot silhouette and ink. Finder and alignment targets use continuous rings with the chosen finder style, center style, and finder colors. Logo requests also fail if the chosen code cannot safely fit the logo. These guardrails improve reliability, but they cannot guarantee that every decorative code will scan on every camera, surface, or print size.
 
 ### Error handling
 

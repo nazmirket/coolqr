@@ -1,0 +1,22 @@
+{
+  "decoded": 1619,
+  "decoderFallbacks": 393,
+  "pixelCases": 60,
+  "failures": [
+    {
+      "data": "https://example.com/dense?abc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abc123",
+      "size": 320,
+      "dotStyle": "horizontal",
+      "dotLayout": "connected",
+      "finderStyle": "circle",
+      "finderInnerStyle": "square",
+      "pattern": "solid",
+      "logo": false,
+      "foreground": "#20245d",
+      "accent": "#4549a3",
+      "background": "#f4f4ff",
+      "finderColor": "#20245d",
+      "finderInnerColor": "#4549a3"
+    }
+  ]
+}

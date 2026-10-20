@@ -170,3 +170,46 @@ segments; this is a size-efficiency opportunity, not a demonstrated encoding err
   verify the page and QR download, then restore `current` and `.deploy-commit` to
   `99c55ba8694fedd72162907024c68b3679566618`. No persistent application data migration
   is involved. Observations cover this rollout, not an ongoing monitoring period.
+
+## Style-consistency correction — unreleased, 2026-10-20
+
+The user's screenshot exposed a regression in 3.3.0: forcing function modules to
+solid squares visibly contradicted the selected diamond style. Timing and metadata
+modules now follow the selected dot style and ink. Alignment targets retain their
+continuous ring structure but use the same frame, center, and colors as finder eyes.
+Mixed frame/center proportions are balanced, and horizontal capsules have slightly
+stronger strokes. The encoded matrix and logo exclusion rules are unchanged.
+
+[Corrected native canvases](images/rendering-review/style-consistency.png) reproduce
+`https://example.com/portfolio` with the Indigo colors, circular frames and centers,
+and individual/connected diamond dots. Inspected in Chrome at 1200px viewport and
+2× device scale. Both actual demo PNG downloads decoded to the exact payload using
+zbar; desktop and 390px mobile checks found no overflow or browser exceptions.
+
+Root verification passes 18 tests and public type checks. The independent encoder
+comparison still matches 640 matrices. Demo verification and pinned Mirket checks
+pass. Regression tests cover styled metadata, the screenshot's alignment target,
+and multiple alignment targets in higher versions.
+
+The expanded browser sweep is **not green**: 1,619 of 1,620 images decoded with jsQR
+or zbar (393 needed zbar), and 60 pixel-integrity cases passed. The remaining failure
+uses a dense URL at 320px, connected horizontal dots, circular frames and square
+centers. [Exact result and reproduction options](images/rendering-review/style-decoder-results.json)
+are retained. A smaller square-center experiment added two failures and was reverted.
+This is a demonstrated scan limitation, not proof of universal scanner compatibility.
+Physical cameras, printing, Safari and Firefox remain untested.
+
+Reproduce the strict sweep after building the root package:
+
+```sh
+COOLQR_PLAYWRIGHT_MODULE=/path/to/playwright \
+COOLQR_BROWSER_PATH=/path/to/chrome \
+COOLQR_DECODER_PATH=/path/to/jsQR.js \
+COOLQR_ZBAR_PATH=/path/to/zbarimg \
+node scripts/check-rendering.mjs --full
+```
+
+The command deliberately exits nonzero while any case fails; its threshold was not
+relaxed. The visual repair budget is exhausted. Publication and production deployment
+are held pending resolution of this failure. npm and the website remain on 3.3.0;
+no 3.3.1 release or tag was created.

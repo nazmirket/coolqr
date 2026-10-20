@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Honor the selected dot silhouette and ink on timing and metadata modules instead
+  of silently substituting squares. Style alignment targets with the selected
+  finder ring, center, and colors while keeping their rings continuous.
+- Balance mixed finder frame/center proportions and strengthen horizontal capsule
+  strokes for dense styled codes without substituting the selected shapes.
+- Add screenshot regression coverage and a full cross-style browser decoder sweep.
+
 ## 3.3.0 — 2026-10-20
 
 - Remove only whole data modules beneath visible logo pixels and padding by default;

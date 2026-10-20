@@ -1,4 +1,4 @@
-import { encodeQR } from './encoder'
+import { alignmentCoordinates, encodeQR } from './encoder'
 import { prepareLogo, validateLogo } from './logo'
 import type {
 	ColorPattern,
@@ -256,7 +256,7 @@ function drawConnectedContour(
 		return
 	}
 	if (style === 'horizontal') {
-		const inset = height * 0.08
+		const inset = height * 0.06
 		if (!neighbors.top) {
 			y += inset
 			height -= inset
@@ -337,7 +337,7 @@ function drawDataModule(
 	}
 }
 
-function drawFinder(
+function drawLocator(
 	ctx: CanvasRenderingContext2D,
 	edge: (index: number) => number,
 	column: number,
@@ -347,26 +347,39 @@ function drawFinder(
 	outerColor: string,
 	innerColor: string,
 	background: string,
+	span = 7,
 ): void {
 	const x0 = edge(column)
 	const y0 = edge(row)
 	const x1 = edge(column + 1)
 	const y1 = edge(row + 1)
-	const x6 = edge(column + 6)
-	const y6 = edge(row + 6)
-	const x7 = edge(column + 7)
-	const y7 = edge(row + 7)
+	const x6 = edge(column + span - 1)
+	const y6 = edge(row + span - 1)
+	const x7 = edge(column + span)
+	const y7 = edge(row + span)
 	ctx.fillStyle = outerColor
 	drawShape(ctx, x0, y0, x7 - x0, y7 - y0, style)
 	ctx.fillStyle = background
 	drawShape(ctx, x1, y1, x6 - x1, y6 - y1, style)
 	ctx.fillStyle = innerColor
+	const centerX = (x0 + x7) / 2
+	const centerY = (y0 + y7) / 2
+	// Balance unlike frame/center shapes optically without changing their silhouettes.
+	// Diamond centers need more ink; square centers inside circles need more clear ring.
+	const centerScale =
+		innerStyle === 'diamond'
+			? 1.2
+			: style === 'circle' && innerStyle !== 'circle'
+				? 0.85
+				: 1
+	const centerWidth = (edge(column + span - 2) - edge(column + 2)) * centerScale
+	const centerHeight = (edge(row + span - 2) - edge(row + 2)) * centerScale
 	drawShape(
 		ctx,
-		edge(column + 2),
-		edge(row + 2),
-		edge(column + 5) - edge(column + 2),
-		edge(row + 5) - edge(row + 2),
+		centerX - centerWidth / 2,
+		centerY - centerHeight / 2,
+		centerWidth,
+		centerHeight,
 		innerStyle,
 	)
 }
@@ -540,6 +553,26 @@ export async function renderQR(
 		symbolEnd,
 		options.patternAngle ?? 45,
 	)
+	// Alignment targets are continuous locator rings, styled like the finder eyes.
+	// Keep them separate from data contours, even in isolated-dot layouts.
+	const alignment = alignmentCoordinates(qr.version, qr.size)
+	const alignmentOrigins: { row: number; column: number }[] = []
+	const alignmentModules = new Uint8Array(qr.modules.length)
+	for (let r = 0; r < alignment.length; r++) {
+		for (let c = 0; c < alignment.length; c++) {
+			if (
+				(r === 0 && c === 0) ||
+				(r === 0 && c === alignment.length - 1) ||
+				(c === 0 && r === alignment.length - 1)
+			)
+				continue
+			const row = alignment[r] - 2
+			const column = alignment[c] - 2
+			alignmentOrigins.push({ row, column })
+			for (let y = row; y < row + 5; y++)
+				for (let x = column; x < column + 5; x++) alignmentModules[y * qr.size + x] = 1
+		}
+	}
 	const darkOutsideFinder = (row: number, column: number): boolean =>
 		row >= 0 &&
 		column >= 0 &&
@@ -547,11 +580,17 @@ export async function renderQR(
 		column < qr.size &&
 		qr.modules[row * qr.size + column] === 1 &&
 		!logo?.removed[row * qr.size + column] &&
+		!alignmentModules[row * qr.size + column] &&
 		!isFinder(row, column, qr.size)
 	for (let row = 0; row < qr.size; row++) {
 		for (let column = 0; column < qr.size; column++) {
 			const offset = row * qr.size + column
-			if (!qr.modules[offset] || logo?.removed[offset] || isFinder(row, column, qr.size))
+			if (
+				!qr.modules[offset] ||
+				logo?.removed[offset] ||
+				alignmentModules[offset] ||
+				isFinder(row, column, qr.size)
+			)
 				continue
 			if (pattern === 'checker') {
 				// Larger ink blocks preserve the sense of a continuous cluster.
@@ -564,12 +603,6 @@ export async function renderQR(
 			const y = edge(QUIET_ZONE + row)
 			const width = edge(QUIET_ZONE + column + 1) - x
 			const height = edge(QUIET_ZONE + row + 1) - y
-			// Timing, alignment and metadata are scanner landmarks, not decorative dots.
-			if (qr.functionModules[offset]) {
-				ctx.fillStyle = foreground
-				ctx.fillRect(x, y, width, height)
-				continue
-			}
 			drawDataModule(ctx, x, y, width, height, dotStyle, dotLayout, {
 				top: darkOutsideFinder(row - 1, column),
 				right: darkOutsideFinder(row, column + 1),
@@ -578,7 +611,7 @@ export async function renderQR(
 			})
 		}
 	}
-	drawFinder(
+	drawLocator(
 		ctx,
 		edge,
 		QUIET_ZONE,
@@ -589,7 +622,7 @@ export async function renderQR(
 		finderInnerColor,
 		background,
 	)
-	drawFinder(
+	drawLocator(
 		ctx,
 		edge,
 		QUIET_ZONE + qr.size - 7,
@@ -600,7 +633,7 @@ export async function renderQR(
 		finderInnerColor,
 		background,
 	)
-	drawFinder(
+	drawLocator(
 		ctx,
 		edge,
 		QUIET_ZONE,
@@ -611,6 +644,20 @@ export async function renderQR(
 		finderInnerColor,
 		background,
 	)
+	for (const { row, column } of alignmentOrigins) {
+		drawLocator(
+			ctx,
+			edge,
+			column + QUIET_ZONE,
+			row + QUIET_ZONE,
+			finderStyle,
+			finderInnerStyle,
+			finderColor,
+			finderInnerColor,
+			background,
+			5,
+		)
+	}
 	if (logo) {
 		if (options.logo?.background !== undefined) {
 			ctx.fillStyle = options.logo.background

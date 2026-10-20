@@ -1,5 +1,9 @@
 import fs from 'node:fs'
 import { createRequire } from 'node:module'
+import { execFile } from 'node:child_process'
+import { promisify } from 'node:util'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import assert from 'node:assert/strict'
 
 const require = createRequire(import.meta.url)
@@ -14,13 +18,33 @@ const bundle = `const penalty={};((exports)=>{${source('encoder/penalty')}})(pen
 		executablePath: process.env.COOLQR_BROWSER_PATH,
 		headless: true,
 	})
+	const scratch = fs.mkdtempSync(join(tmpdir(), 'coolqr-scan-'))
+	let imageNumber = 0
 	try {
 		const page = await browser.newPage()
+		await page.exposeFunction('decodeFallback', async (dataUrl, expected) => {
+			if (!process.env.COOLQR_ZBAR_PATH) return false
+			const path = join(scratch, `${imageNumber++}.png`)
+			fs.writeFileSync(path, Buffer.from(dataUrl.split(',')[1], 'base64'))
+			try {
+				const { stdout } = await promisify(execFile)(
+					process.env.COOLQR_ZBAR_PATH,
+					['--quiet', '--raw', path],
+					{ timeout: 5000 },
+				)
+				return stdout === expected + '\n'
+			} catch {
+				return false
+			} finally {
+				fs.unlinkSync(path)
+			}
+		})
 		await page.setContent('<html></html>')
 		await page.addScriptTag({ content: bundle })
 		await page.addScriptTag({ path: process.env.COOLQR_DECODER_PATH })
-		const result = await page.evaluate(async () => {
+		const result = await page.evaluate(async full => {
 			const failures = []
+			let decoderFallbacks = 0
 			let decoded = 0,
 				pixelCases = 0
 			const styles = [
@@ -107,11 +131,57 @@ const bundle = `const penalty={};((exports)=>{${source('encoder/penalty')}})(pen
 			})
 			if (base.toDataURL() !== clear.toDataURL())
 				throw Error('Transparent logo erased modules')
-			return { decoded, pixelCases, failures }
-		})
+			// Full sweep crosses dot/layout choices with every finder frame/center pair.
+			if (full) {
+				let caseNumber = 0
+				for (const data of [
+					'https://example.com/portfolio',
+					'Hello, İstanbul 🌿',
+					'https://example.com/dense?' + 'abc123'.repeat(24),
+				])
+					for (const dotStyle of styles)
+						for (const dotLayout of ['connected', 'isolated'])
+							for (const finderStyle of ['square', 'rounded', 'circle'])
+								for (const finderInnerStyle of ['square', 'rounded', 'circle', 'diamond'])
+									for (const size of [320, 512]) {
+										const pattern = ['solid', 'linear', 'radial', 'checker'][
+											caseNumber++ % 4
+										]
+										const logo =
+											caseNumber % 3 === 0
+												? { ...logos[1], scale: 0.12, padding: 2 }
+												: undefined
+										const options = {
+											size,
+											dotStyle,
+											dotLayout,
+											finderStyle,
+											finderInnerStyle,
+											pattern,
+											logo,
+											foreground: '#20245d',
+											accent: '#4549a3',
+											background: '#f4f4ff',
+											finderColor: '#20245d',
+											finderInnerColor: '#4549a3',
+										}
+										const canvas = await window.qr.renderQR(data, options)
+										const pixels = canvas
+											.getContext('2d')
+											.getImageData(0, 0, size, size).data
+										if (window.jsQR(pixels, size, size)?.data === data) decoded++
+										else if (await window.decodeFallback(canvas.toDataURL(), data)) {
+											decoded++
+											decoderFallbacks++
+										} else failures.push({ data, ...options, logo: !!logo })
+									}
+			}
+			return { decoded, decoderFallbacks, pixelCases, failures }
+		}, process.argv.includes('--full'))
 		process.stdout.write(JSON.stringify(result, null, 2) + '\n')
 		assert.equal(result.failures.length, 0)
 	} finally {
 		await browser.close()
+		fs.rmSync(scratch, { recursive: true, force: true })
 	}
 })()

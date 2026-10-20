@@ -129,27 +129,31 @@ function isFinder(row, column, size) {
 	)
 }
 
-test('styles data modules while preserving square scanner landmarks', async () => {
+test('styles timing and metadata dots while keeping alignment targets continuous', async () => {
 	const data = 'https://example.com/coolqr'
 	const qr = encodeQR(data)
+	assert.equal(qr.version, 2)
+	const isAlignment = (row, column) =>
+		row >= qr.size - 9 &&
+		row <= qr.size - 5 &&
+		column >= qr.size - 9 &&
+		column <= qr.size - 5
 	const darkCells = []
 	for (let row = 0; row < qr.size; row++)
 		for (let column = 0; column < qr.size; column++) {
 			const offset = row * qr.size + column
-			if (qr.modules[offset] && !isFinder(row, column, qr.size))
+			if (
+				qr.modules[offset] &&
+				!isFinder(row, column, qr.size) &&
+				!isAlignment(row, column)
+			)
 				darkCells.push({ row, column, function: Boolean(qr.functionModules[offset]) })
 		}
 	assert.ok(darkCells.some(cell => cell.function))
 	const isolated = await renderQR(data, { dotStyle: 'circle', dotLayout: 'isolated' })
 	const connected = await renderQR(data, { dotStyle: 'circle', dotLayout: 'connected' })
-	assert.equal(
-		isolated.context.ellipseStyles.length,
-		darkCells.filter(cell => !cell.function).length,
-	)
-	assert.equal(
-		connected.context.filledPathPoints.length,
-		darkCells.filter(cell => !cell.function).length,
-	)
+	assert.equal(isolated.context.ellipseStyles.length, darkCells.length)
+	assert.equal(connected.context.filledPathPoints.length, darkCells.length)
 	assert.equal(connected.context.fillRectCalls, isolated.context.fillRectCalls)
 
 	const checker = await renderQR(data, {
@@ -159,7 +163,7 @@ test('styles data modules while preserving square scanner landmarks', async () =
 		foreground: '#111827',
 		accent: '#1e40af',
 	})
-	for (const [index, cell] of darkCells.filter(cell => !cell.function).entries()) {
+	for (const [index, cell] of darkCells.entries()) {
 		const expected =
 			(Math.floor(cell.row / 3) + Math.floor(cell.column / 3)) % 2 === 0
 				? '#111827'
@@ -269,4 +273,40 @@ test('in-flight renders retain their logo when callers edit the options object',
 	options.logo = undefined
 	const canvas = await pending
 	assert.equal(canvas.context.imageCalls, 1)
+})
+
+test('isolated diamonds with circular eyes never silently render square modules', async () => {
+	const canvas = await renderQR('https://example.com/portfolio', {
+		dotStyle: 'diamond',
+		dotLayout: 'isolated',
+		finderStyle: 'circle',
+		finderInnerStyle: 'circle',
+		finderColor: '#20245d',
+		finderInnerColor: '#4549a3',
+		background: '#f4f4ff',
+	})
+	// Only the canvas background is a rectangle. Both large and small eyes are circles.
+	assert.equal(canvas.context.fillRectCalls, 1)
+	assert.equal(canvas.context.ellipseStyles.length, 12)
+	assert.deepEqual([...new Set(canvas.context.filledPathPoints)], [4])
+	assert.equal(
+		canvas.context.ellipseStyles.filter(color => color === '#4549a3').length,
+		4,
+	)
+})
+
+test('dense codes style every alignment target, including those crossing timing lines', async () => {
+	const data = 'A'.repeat(500)
+	const qr = encodeQR(data)
+	assert.ok(qr.version >= 7)
+	const positions = Math.floor(qr.version / 7) + 2
+	const targets = positions * positions - 3
+	const canvas = await renderQR(data, {
+		dotStyle: 'diamond',
+		dotLayout: 'isolated',
+		finderStyle: 'circle',
+		finderInnerStyle: 'circle',
+	})
+	assert.equal(canvas.context.ellipseStyles.length, (3 + targets) * 3)
+	assert.equal(canvas.context.fillRectCalls, 1)
 })

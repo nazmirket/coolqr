@@ -203,7 +203,7 @@
 					<fieldset class="control-group"
 						><legend
 							><span class="micro-label">Finder frame</span
-							><span class="control-hint">Outer corner style</span></legend
+							><span class="control-hint">All target rings</span></legend
 						><div class="choice-grid finder-grid"
 							><button
 								v-for="style in finderStyles"
@@ -222,7 +222,7 @@
 					<fieldset class="control-group"
 						><legend
 							><span class="micro-label">Finder center</span
-							><span class="control-hint">Inner eye treatment</span></legend
+							><span class="control-hint">All target centers</span></legend
 						><div class="choice-grid finder-grid"
 							><button
 								v-for="style in finderInnerStyles"

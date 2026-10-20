@@ -372,7 +372,8 @@ function interleave(
 	return result
 }
 
-function alignmentCoordinates(version: number, size: number): number[] {
+/** @internal Shared locator positions for encoding and styled rendering. */
+export function alignmentCoordinates(version: number, size: number): number[] {
 	if (version === 1) return []
 	const count = Math.floor(version / 7) + 2
 	const interval = size === 145 ? 26 : Math.ceil((size - 13) / (2 * count - 2)) * 2

@@ -1,7 +1,7 @@
 /** The QR Code Model 2 error-correction level. */
 export type ErrorCorrectionLevel = 'L' | 'M' | 'Q' | 'H'
 
-/** Shape of dark data modules. Scanner landmarks remain square. */
+/** Shape of dark modules outside finder and alignment targets. */
 export type DotStyle =
 	| 'square'
 	| 'rounded'
@@ -17,13 +17,13 @@ export type DotStyle =
 /** Whether neighboring dark modules share one contour or remain individual marks. */
 export type DotLayout = 'connected' | 'isolated'
 
-/** The shape used for the outer finder-pattern ring. */
+/** The shape used for finder and alignment target rings. */
 export type FinderStyle = 'square' | 'rounded' | 'circle'
 
-/** The shape used for the dark center of each finder pattern. */
+/** The shape used for the dark center of finder and alignment targets. */
 export type FinderInnerStyle = 'square' | 'rounded' | 'circle' | 'diamond'
 
-/** The color treatment used for dark modules outside the finder patterns. */
+/** The color treatment used for dark modules outside finder and alignment targets. */
 export type ColorPattern = 'solid' | 'linear' | 'radial' | 'checker'
 
 /** A small image placed in a module cutout that follows its visible pixels. */
@@ -48,19 +48,19 @@ export interface RenderOptions {
 	foreground?: string
 	/** CSS color for the background and quiet zone. Default #ffffff. */
 	background?: string
-	/** Shape of dark data modules. Scanner landmarks remain square. Default square. */
+	/** Shape of dark modules outside finder and alignment targets. Default square. */
 	dotStyle?: DotStyle
 	/** Connected contours or individual marks. Default connected. */
 	dotLayout?: DotLayout
-	/** Shape of the three finder-pattern rings. Default square. */
+	/** Shape of finder and alignment target rings. Default square. */
 	finderStyle?: FinderStyle
-	/** Shape of the dark center in each finder pattern. Default square. */
+	/** Shape of finder and alignment target centers. Default square. */
 	finderInnerStyle?: FinderInnerStyle
-	/** CSS color for finder-pattern rings. Defaults to foreground. */
+	/** CSS color for finder and alignment rings. Defaults to foreground. */
 	finderColor?: string
-	/** CSS color for finder-pattern centers. Defaults to finderColor. */
+	/** CSS color for finder and alignment centers. Defaults to finderColor. */
 	finderInnerColor?: string
-	/** Color pattern for dark modules outside the finder patterns. Default solid. */
+	/** Color pattern for dark modules outside finder and alignment targets. Default solid. */
 	pattern?: ColorPattern
 	/** Second dark color used by linear, radial, and checker patterns. */
 	accent?: string
