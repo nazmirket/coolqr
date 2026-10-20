@@ -245,3 +245,34 @@ quiet zones, and logo exclusion rules are preserved.
   and reports `installed_binary.matches_process: true`.
 - Physical camera/print testing and Safari/Firefox remain outside this evidence.
   The earlier release hold is resolved by these checks; deployment evidence follows.
+
+### 3.3.1 website rollout
+
+- Release source: `48c4772a13085fd604b459fb564f313e55d7583f`.
+  [Application CI](https://github.com/nazmirket/coolqr/actions/runs/39407111517) and
+  [Mirket CI](https://github.com/nazmirket/coolqr/actions/runs/39407111530) passed.
+- npm tarball `coolqr-3.3.1.tgz` SHA-1 is
+  `f1c258ac2cc0ad3cc91081b0880fa067cad0b4c5`. Extracted `dist/` files match the tested
+  build byte-for-byte and the public package entrypoint was exercised. At this
+  checkpoint npm publication is waiting for the account's web authentication.
+- Source archive SHA-256:
+  `df3940206da4109bda441fec651307e4831495aa50bf3691e599f489439e8fe8`.
+  Server image `coolqr-demo:48c4772`:
+  `sha256:08b75569689fc5e03fd59f019aefe2f434cba0337ff941d2276ec5ba5097ae7f`.
+- The isolated canary passed 20 real UI downloads (all ten styles in each layout),
+  with exact PNG equality against the tested library and exact payload decoding.
+  Transparent-logo upload/download, desktop and 390px mobile checks passed without
+  browser exceptions or horizontal overflow. The new output-equality guard
+  rejected the old production rendering before promotion.
+- Restored the prior image on the canary, verified its identity and HTTP health,
+  then restored the candidate and verified its identity again. Promoted that same
+  candidate image at **2026-10-20T10:22:37Z**. Nginx and the production port are unchanged.
+- The public HTTPS site passed all 20 download comparisons and decoding checks.
+  Production reports `healthy`; `/opt/coolqr/current` and `.deploy-commit` identify
+  the new release. The disposable canary was removed.
+- Rollback remains available in `/opt/coolqr/releases/06b2947` using image
+  `coolqr-demo:06b2947` (immutable identity
+  `sha256:677af2ab3fe42c466eff3b84dbab065b2a1e9a164b9097521acdc21bd570151b`).
+  Run `COOLQR_PORT=9491 COOLQR_IMAGE_TAG=06b2947 docker compose -p coolqr up -d --no-build`
+  there, verify the page/download, and restore the `current` symlink and
+  `.deploy-commit` to `06b29471d55f72081a2f25a0c781c8436fdf3bdb` if recovery is needed.
