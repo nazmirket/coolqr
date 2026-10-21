@@ -206,17 +206,18 @@ Use [GitHub Issues](https://github.com/nazmirket/coolqr/issues) for bugs and fea
 
 ### Agent development
 
-Both Codex Desktop and Claude Desktop Code use the Mirket harness. Follow
-[AGENTS.md](AGENTS.md) for setup, selected expertise, worker routing and
-application verification. Run `pnpm agents:check` before delivery; the dedicated
-Mirket CI workflow checks the committed integration and real failure probes.
+Codex Desktop and Claude Desktop Code share [AGENTS.md](AGENTS.md) as the
+project-specific entry point for Mirket 0.0.1. The installed skills own detailed
+engineering, debugging, test and design methods. Run `pnpm agents:check` before
+delivery; dedicated CI checks the pinned harness and managed guidance.
 
-
-The reviewed Mirket release is pinned by platform and content in
-[.mirket/release.json](.mirket/release.json). CI and `agents:check` share this
-identity. The [adoption record](docs/mirket-migration.md) documents provenance,
-verification and the remaining Claude activation check. Application CI builds
-and tests the root before installing and verifying the demo's local dependency.
+The reviewed release is pinned by platform and content in
+[.mirket/release.json](.mirket/release.json). The
+[current adoption record](docs/mirket-0.0.1-adoption.md) covers provenance,
+verification and live activation limits. The
+[earlier migration record](docs/mirket-migration.md) is historical evidence.
+Application CI builds and tests the root before installing and verifying the
+demo's local dependency.
 
 After a harness update, inspect `mirket project plan --project .`, then use
 `mirket project sync --project . --prune` and `pnpm agents:check`. Inspect changed
@@ -224,8 +225,6 @@ managed files before synchronization; do not overwrite unexplained conflicts.
 Invoke `runtime_status` in each client and compare with `mirket info --json`;
 matching version labels alone are insufficient.
 
-Project facts remain in repository files. No Mem0 or LangGraph application
-integration is needed for this stateless browser library. If future agent work
-needs durable state, use the installed lifecycle guidance and `mirket backup
---help` before migration. A binary downgrade alone cannot restore newer durable
-state. This migration did not modify durable schemas or restore private data.
+Project facts remain in repository files. Optional Mem0 and LangGraph support
+agent work; they are not part of this stateless browser library. The 0.0.1
+installation starts fresh and does not import older private state.

@@ -21,24 +21,26 @@ including integrity receipts and license notices; maintain them with the CLI.
 methods. Shared planning, security, research and coordination guidance comes
 from the global installation, not duplicate project copies.
 
-On a new machine, install the published CLI from
-[codemirket/harness](https://github.com/codemirket/harness/releases), then run:
+On a new machine, follow the [official 0.0.1 installation guide](https://github.com/codemirket/harness/blob/main/docs/agent-installation.md):
+verify the release artifact before running it and keep Mirket application data
+under `~/.mirket`. Configure the actual Codex and Claude hosts, then run:
 
 ```sh
 mirket setup --target all --yes
-mirket project init --project "$PWD" --target all
+mirket project register --project "$PWD"
 mirket project plan --project "$PWD"
 mirket project sync --project "$PWD" --prune
 mirket project doctor --project "$PWD"
 ```
 
-The reviewed release is [mirket-v1.0.11](https://github.com/codemirket/harness/releases/tag/mirket-v1.0.11),
-published 2026-10-20T07:01:43Z. Resolve future releases by publication time,
-not the largest historical version. Use `mirket update --check` to inspect and
-`mirket update` to update; synchronize and verify each affected project afterward.
-Update `.mirket/release.json` from published asset metadata; CI and local checks
-share this pin, including binary, compiled source and embedded catalog hashes.
-Do not substitute an unreviewed source build or bypass a digest mismatch.
+The reviewed release is [mirket-v0.0.1](https://github.com/codemirket/harness/releases/tag/mirket-v0.0.1).
+This fresh baseline does not import pre-0.0.1 registrations or state. Inspect
+registered roots with paginated `mirket project list --json` before registering
+an existing manifest with `mirket project register --project "$PWD"`. Use
+`project init --project "$PWD" --target all` only when no manifest exists.
+`.mirket/release.json` pins the published binary, compiled source and embedded
+catalog identities for CI and
+local checks. Never bypass a digest mismatch or overwrite managed-copy conflicts.
 
 Before work, inspect current changes, this guide, affected source owners, the
 manifest and available tools. Run `pnpm agents:check`. A failed check is a
@@ -59,6 +61,11 @@ Handle routine work directly. When continuity, recovery or coordination needs
 durable state, reuse a sufficient existing record or use Mirket task tools;
 retain decisions, source pointers, acceptance evidence and a meaningful failure
 probe. Do not create a parallel tracker or require task ceremony for every edit.
+With the optional agent runtime selected, use focused Mem0 recall for prior
+project decisions and store only verified stable facts with provenance and
+supersession. Mirket-owned workers use LangGraph checkpoints; inspect and resume
+their original workflow after an interruption. Native host sessions retain
+their own lifecycle. Do not infer memory correctness from package readiness.
 
 Delegate only when independent work materially helps or it is requested. For
 Mirket-owned workers, read `agent-coordination/references/model-routing.md`
@@ -82,11 +89,12 @@ for implementation evidence; tool readiness and screenshots alone are not
 acceptance.
 
 For Mirket design production, use the single `design` package's reported
-workspace and compile Style Dictionary tokens first. Route live UI to
-Playwright, editable canvases to official Penpot MCP, diagrams to Kroki,
-video to HyperFrames lint → snapshot → render, paged work to Typst, vectors
-to SVG/resvg, SVG hygiene to SVGO, raster preparation to Sharp, static Flexbox
-graphics to Satori/resvg and comparable pixels to Odiff. Inspect saved outputs.
+workspace and compile Style Dictionary tokens before dependent rendering. Route
+live UI to browser inspection, editable designs to OpenPencil, diagrams to
+Kroki (select Excalidraw explicitly only when needed), paged work to Typst,
+vectors to SVG/resvg, SVG hygiene to SVGO, raster preparation to Sharp, static
+Flexbox graphics to Satori/resvg and comparable pixels to Odiff. Encoded video
+requires separately selected host tooling. Inspect saved outputs.
 Package installation, runtime readiness, invocation and useful output are
 separate facts; use native project tools for application verification.
 
@@ -98,7 +106,7 @@ does not prove desktop activation, authenticated worker execution or application
 correctness. Call `runtime_status` in each actual desktop connection and compare its binary,
 source and catalog hashes with the reviewed pin. Require
 `installed_binary.matches_process: true`; CLI doctor does not prove activation.
-See `docs/mirket-migration.md` for observed evidence and remaining client gaps.
+See `docs/mirket-0.0.1-adoption.md` for current evidence and remaining client gaps.
 
 Keep secrets, local host configuration, task/runtime caches and the transient
 `.mirket/project.lock` mutex out of commits. Preserve unrelated work. Commits,

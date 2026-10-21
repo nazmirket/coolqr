@@ -1,5 +1,8 @@
 # Mirket adoption — 2026-10-20
 
+Historical record for the 1.0.11 migration. For the current 0.0.1 method and
+checks, see [the current adoption record](mirket-0.0.1-adoption.md).
+
 ## Baseline and ownership
 
 Started on clean `master`. Infrastructure engineering leads this migration,
