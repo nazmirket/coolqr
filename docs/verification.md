@@ -278,3 +278,45 @@ quiet zones, and logo exclusion rules are preserved.
   Run `COOLQR_PORT=9491 COOLQR_IMAGE_TAG=06b2947 docker compose -p coolqr up -d --no-build`
   there, verify the page/download, and restore the `current` symlink and
   `.deploy-commit` to `06b29471d55f72081a2f25a0c781c8436fdf3bdb` if recovery is needed.
+
+## Independent review and deployment pinning — 2026-10-22
+
+Three independent read-only reviews covered the library, the Nuxt demo, and the
+delivery path. The library and demo reviews found no clear source-backed defects.
+The delivery review identified moving GitHub Action tags and a moving Docker
+base image. Commit `5a134851ec18efe70d53c3f7093bc90389454dd1` pins both
+workflows to verified `checkout` and `setup-node` v5 commits and pins both
+Docker stages to the same multi-platform Node 24 Alpine index digest
+`sha256:06d7adf3e0ef61a13f1d28682726366f97a15aa1888c934d3ecec86c33918b53`.
+Corepack still requests exact pnpm 9.15.9; a separate manager-artifact pin was
+conditional advice, not a demonstrated defect.
+
+- Root install/verification passed 18 tests and public type checks. Demo install,
+  lint, typecheck and build passed. `pnpm agents:check` passed all 11 checks;
+  `npm pack --dry-run --ignore-scripts` contained 16 package files.
+- [Application CI](https://github.com/nazmirket/coolqr/actions/runs/39832467685)
+  and [Mirket CI](https://github.com/nazmirket/coolqr/actions/runs/39832467752)
+  passed on the pinned commit. The local Podman VM stopped after startup, so its
+  Compose gate could not run. The production host's Docker Compose provider
+  built and exercised the exact committed source instead.
+- The transferred Git archive SHA-256 was
+  `f11e525265f622f49eb10aeac2c9682408a2f54da2d40c6191f08b88a59d67ba`.
+  The isolated canary used image `coolqr-demo:5a13485`, immutable ID
+  `sha256:e1ae25a86e6c618a3ee0af74d9d0eda0f684ce7dc209ee28040cb494f49a9e9b`.
+  Desktop and 390px mobile checks returned HTTP 200, no page exceptions or
+  horizontal overflow, and PNG downloads decoded exactly to the test URL. The
+  downloads matched the prior public site's PNG byte for byte. The canary was
+  switched to the prior image and back, with both image IDs and HTTP responses
+  checked.
+- The same image was promoted to the existing `coolqr` service at
+  `2026-10-22T18:34:44Z`. Docker reports `healthy`; `/opt/coolqr/current` and
+  `.deploy-commit` identify the pinned commit. The public HTTPS page returned
+  HTTP 200 and passed the same desktop/mobile download and exact decoding checks.
+  Its PNGs matched the canary byte for byte. The disposable canary was removed.
+- Rollback image `coolqr-demo:48c4772` and release directory
+  `/opt/coolqr/releases/48c4772` remain available. From that directory, run
+  `COOLQR_PORT=9491 COOLQR_IMAGE_TAG=48c4772 docker compose -p coolqr up -d --no-build`,
+  verify the public page/download, then restore `current` and `.deploy-commit`
+  to `48c4772a13085fd604b459fb564f313e55d7583f`. No application data
+  migration occurred. npm package 3.3.1 was not republished; this change only
+  affects build and delivery configuration.
