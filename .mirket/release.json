@@ -1,22 +1,23 @@
 {
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"assets": [
 		{
 			"target": "aarch64-apple-darwin",
-			"url": "https://github.com/codemirket/harness/releases/download/mirket-v0.0.1/mirket-aarch64-apple-darwin",
-			"sha256": "20221fee28ff8658c6dd59d2e119f1b8bd42ff6ba88f93a93549df4583e6a208"
+			"url": "https://github.com/codemirket/harness/releases/download/mirket-v0.0.2/mirket-aarch64-apple-darwin",
+			"sha256": "ee9eea0157686522e68e70220cebfbbe53eb804b68349913f31a9b867db97959"
 		},
 		{
 			"target": "x86_64-pc-windows-msvc",
-			"url": "https://github.com/codemirket/harness/releases/download/mirket-v0.0.1/mirket-x86_64-pc-windows-msvc.exe",
-			"sha256": "57dc662faa40d71796b564c83e5b5a73dc41c1c30c69e7dbd8a57215778db913"
+			"url": "https://github.com/codemirket/harness/releases/download/mirket-v0.0.2/mirket-x86_64-pc-windows-msvc.exe",
+			"sha256": "aeb4decdab085ed32ee09bcbfd58f9b3a26285de293f7578591053240028e371"
 		},
 		{
 			"target": "x86_64-unknown-linux-gnu",
-			"url": "https://github.com/codemirket/harness/releases/download/mirket-v0.0.1/mirket-x86_64-unknown-linux-gnu",
-			"sha256": "0ae25b8ea6579948e30fb9e3d109e737ad7dd7b5ec40cb5d1885bd1923cbb684"
+			"url": "https://github.com/codemirket/harness/releases/download/mirket-v0.0.2/mirket-x86_64-unknown-linux-gnu",
+			"sha256": "68e57984a31bc17c8eac80dd1f7f8d8f732f9765a6e2171f393598bfb2b56cdb"
 		}
 	],
-	"source_sha256": "9fafb9569f18111047ac704301513aca67ae85ab04a0f588f95382425e0f133e",
-	"catalog_sha256": "fa6bac7cb2b55197fdd49b5ab27b378ab1bef4d295b5f36840b7c1f10f1fbe53"
+	"source_sha256": "d0482b152dd40aea9a1329090bfa81ab3f9fc7eed83397fa8f59ef3913e9f14d",
+	"catalog_sha256": "8e74d16f4632ed824652dc5e3f1c3d69ed82c8359078f81b58927f5aec22d47c",
+	"release_manifest_sha256": "de1b394bab8718d11e94436a621cea286229d58d9c614ef7a1cbe4e60afba4d6"
 }

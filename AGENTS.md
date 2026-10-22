@@ -21,7 +21,7 @@ including integrity receipts and license notices; maintain them with the CLI.
 methods. Shared planning, security, research and coordination guidance comes
 from the global installation, not duplicate project copies.
 
-On a new machine, follow the [official 0.0.1 installation guide](https://github.com/codemirket/harness/blob/main/docs/agent-installation.md):
+On a new machine, follow the [official 0.0.2 installation guide](https://github.com/codemirket/harness/blob/mirket-v0.0.2/docs/agent-installation.md):
 verify the release artifact before running it and keep Mirket application data
 under `~/.mirket`. Configure the actual Codex and Claude hosts, then run:
 
@@ -33,8 +33,9 @@ mirket project sync --project "$PWD" --prune
 mirket project doctor --project "$PWD"
 ```
 
-The reviewed release is [mirket-v0.0.1](https://github.com/codemirket/harness/releases/tag/mirket-v0.0.1).
-This fresh baseline does not import pre-0.0.1 registrations or state. Inspect
+The reviewed release is [Mirket 0.0.2](https://github.com/codemirket/harness/releases/tag/mirket-v0.0.2).
+It preserves existing 0.0.1 registrations and data; the fresh-start boundary
+only excludes pre-0.0.1 state. Inspect
 registered roots with paginated `mirket project list --json` before registering
 an existing manifest with `mirket project register --project "$PWD"`. Use
 `project init --project "$PWD" --target all` only when no manifest exists.
@@ -89,12 +90,19 @@ for implementation evidence; tool readiness and screenshots alone are not
 acceptance.
 
 For Mirket design production, use the single `design` package's reported
-workspace and compile Style Dictionary tokens before dependent rendering. Route
+workspace. Route
 live UI to browser inspection, editable designs to OpenPencil, diagrams to
 Kroki (select Excalidraw explicitly only when needed), paged work to Typst,
 vectors to SVG/resvg, SVG hygiene to SVGO, raster preparation to Sharp, static
 Flexbox graphics to Satori/resvg and comparable pixels to Odiff. Encoded video
 requires separately selected host tooling. Inspect saved outputs.
+Compile Style Dictionary tokens for dependent production and reference their outputs in authored
+source. Observational captures and saved-file exports preserve existing sources
+without injecting or requiring tokens. Odiff reports completed comparisons and
+whether pixels match separately; request `expect_match: true` when equality is
+an acceptance requirement. Inspect applicable design axes and record why any
+axis is irrelevant; keep all affected application gates.
+
 Package installation, runtime readiness, invocation and useful output are
 separate facts; use native project tools for application verification.
 
@@ -106,7 +114,7 @@ does not prove desktop activation, authenticated worker execution or application
 correctness. Call `runtime_status` in each actual desktop connection and compare its binary,
 source and catalog hashes with the reviewed pin. Require
 `installed_binary.matches_process: true`; CLI doctor does not prove activation.
-See `docs/mirket-0.0.1-adoption.md` for current evidence and remaining client gaps.
+See `docs/harness.md` for current release maintenance and verification boundaries.
 
 Keep secrets, local host configuration, task/runtime caches and the transient
 `.mirket/project.lock` mutex out of commits. Preserve unrelated work. Commits,

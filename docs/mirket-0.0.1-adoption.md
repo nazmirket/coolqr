@@ -1,6 +1,7 @@
 # Mirket 0.0.1 adoption — 2026-10-21
 
-This is the current project record. The [2026-10-20 migration record](mirket-migration.md)
+This is historical 0.0.1 evidence. See [current harness guidance](harness.md)
+for the adopted release and maintenance procedure. The [2026-10-20 migration record](mirket-migration.md)
 describes the earlier 1.0.11 installation and remains historical evidence.
 
 ## Baseline and ownership

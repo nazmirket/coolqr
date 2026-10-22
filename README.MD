@@ -207,13 +207,13 @@ Use [GitHub Issues](https://github.com/nazmirket/coolqr/issues) for bugs and fea
 ### Agent development
 
 Codex Desktop and Claude Desktop Code share [AGENTS.md](AGENTS.md) as the
-project-specific entry point for Mirket 0.0.1. The installed skills own detailed
+project-specific entry point for Mirket 0.0.2. The installed skills own detailed
 engineering, debugging, test and design methods. Run `pnpm agents:check` before
 delivery; dedicated CI checks the pinned harness and managed guidance.
 
 The reviewed release is pinned by platform and content in
 [.mirket/release.json](.mirket/release.json). The
-[current adoption record](docs/mirket-0.0.1-adoption.md) covers provenance,
+[current harness guide](docs/harness.md) covers provenance,
 verification and live activation limits. The
 [earlier migration record](docs/mirket-migration.md) is historical evidence.
 Application CI builds and tests the root before installing and verifying the
@@ -226,5 +226,5 @@ Invoke `runtime_status` in each client and compare with `mirket info --json`;
 matching version labels alone are insufficient.
 
 Project facts remain in repository files. Optional Mem0 and LangGraph support
-agent work; they are not part of this stateless browser library. The 0.0.1
-installation starts fresh and does not import older private state.
+agent work; they are not part of this stateless browser library. The 0.0.2 upgrade
+preserves 0.0.1 data; the fresh-start restriction applies only to pre-0.0.1 state.
