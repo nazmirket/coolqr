@@ -320,3 +320,16 @@ conditional advice, not a demonstrated defect.
   to `48c4772a13085fd604b459fb564f313e55d7583f`. No application data
   migration occurred. npm package 3.3.1 was not republished; this change only
   affects build and delivery configuration.
+
+### Local Podman follow-up — 2026-10-22
+
+The previously unavailable `podman-machine-default` was running when the local
+container check was retried. Podman client and Linux server both reported 6.1.4.
+`podman compose -f compose.yml config --quiet` passed, and
+`COOLQR_PORT=9492 podman compose -p coolqr-validation up -d --build` built the
+pinned Node image and started the demo. The service bound only to
+`127.0.0.1:9492`, returned HTTP 200, and reached Docker health `healthy`.
+`COOLQR_PORT=9492 podman compose -p coolqr-validation down` removed its
+container and network. Podman remained connected afterward. The earlier startup
+failure did not recur during this check. Its underlying cause remains
+unconfirmed. No VM settings or application source files were changed.
