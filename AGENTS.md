@@ -1,150 +1,63 @@
-# CoolQR repository workflow
+# CoolQR — Mirket project guidance
 
-CoolQR is a browser-side TypeScript library in `src/` with public entrypoints
-in `package.json`. `dist/` is generated. The independent Nuxt demo in `demo/`
-has its own pnpm lockfile and consumes the root package through `file:..`.
-Preserve QR encoding correctness, browser-only rendering boundaries, package
-exports and the local-processing privacy guarantee.
+Use the installed Mirket Pi Durable host for agentic work in this repository.
+This file is the sole repository-specific agent guidance; there are no
+Codex/Claude skill copies, client registrations, release pins or repository MCP
+servers. The host's selected skills, local tools and explicitly configured MCP
+tools provide general methods. Do not discover or execute an ambient agent binary,
+install an agent, change account-wide settings, or bind an unverified executable.
+An installed launcher bound to another project is not proof of a CoolQR startup;
+report that gap rather than rewriting a user-wide launcher from this repository.
 
-Selected specialists cover frontend, infrastructure and search visibility.
-The two host targets share one selection; do not duplicate target-specific
-lists when their expertise is identical.
+## Product boundaries
 
-## Harness ownership
+- `src/encoder/` is the pure QR Model 2 encoder; `src/Render.ts` is browser
+  Canvas rendering. `src/index.ts`, `src/types.ts` and `package.json` define the
+  public API. `dist/` is generated. Keep Node-only encoding free of browser globals.
+- `demo/` is an independent Nuxt application with its own lockfile; its `file:..`
+  dependency needs a freshly built root before the demo install. Preserve the
+  browser-side/local-processing privacy guarantee: no QR content is sent to a
+  server for rendering. Do not expose uploaded images, user content or credentials
+  in logs, commits or verification artifacts.
+- Preserve QR decoding, function patterns, quiet zone, logo safety and styling
+  compatibility. Check malformed/oversized payloads and unsafe logo or contrast
+  options. A generated image or a green build does not prove a scanner can read it.
+  `docs/verification.md` records dated scanner/browser evidence and its limits;
+  `docs/failure-probes.md` records product failure cases. Neither is a current
+  substitute for testing a changed rendering path.
+- The demo's asynchronous render sequence keeps old results from replacing new
+  previews. Verify out-of-order completion when changing that lifecycle.
+- `compose.yml` binds the demo to loopback by default. Deployment, publishing and
+  third-party effects are separate from local verification and require the user's
+  scope and an observed recovery path; preserve the historical rollback evidence
+  in `docs/verification.md`.
 
-Mirket owns reviewed expertise, managed skill copies and its routed workers.
-`AGENTS.md` owns repository instructions; `CLAUDE.md` imports it. The manifest
-`.mirket/project.json` selects the same expertise for Codex Desktop and Claude
-Desktop Code. `.agents/skills/` and `.claude/skills/` are Mirket-managed copies,
-including integrity receipts and license notices; maintain them with the CLI.
-`project-foundation` supplies architecture, debugging, testing and release
-methods. Shared planning, security, research and coordination guidance comes
-from the global installation, not duplicate project copies.
+## Work and verification
 
-On a new machine, follow the [official 0.0.2 installation guide](https://github.com/codemirket/harness/blob/mirket-v0.0.2/docs/agent-installation.md):
-verify the release artifact before running it and keep Mirket application data
-under `~/.mirket`. Configure the actual Codex and Claude hosts, then run:
+Inspect Git status, affected owners and the selected Pi Durable capability before
+editing. Keep source and project state in the repository; use the host's selected
+skills for debugging, frontend, infrastructure, testing, accessibility, design,
+search and release work when applicable. Use only installed, verified local
+executables and MCP routes explicitly selected in this host. MCP availability in
+a tool list does not prove a peer is connected. Keep generated previews and
+fixtures within authorized project paths. Preserve unrelated changes and private
+state; never run an installer or overwrite a conflicting file to make a check pass.
 
-```sh
-mirket setup --target all --yes
-mirket project register --project "$PWD"
-mirket project plan --project "$PWD"
-mirket project sync --project "$PWD" --prune
-mirket project doctor --project "$PWD"
-```
-
-The reviewed release is [Mirket 0.0.2](https://github.com/codemirket/harness/releases/tag/mirket-v0.0.2).
-It preserves existing 0.0.1 registrations and data; the fresh-start boundary
-only excludes pre-0.0.1 state. Inspect
-registered roots with paginated `mirket project list --json` before registering
-an existing manifest with `mirket project register --project "$PWD"`. Use
-`project init --project "$PWD" --target all` only when no manifest exists.
-`.mirket/release.json` pins the published binary, compiled source and embedded
-catalog identities for CI and
-local checks. Never bypass a digest mismatch or overwrite managed-copy conflicts.
-
-Before work, inspect current changes, this guide, affected source owners, the
-manifest and available tools. Run `pnpm agents:check`. A failed check is a
-finding to investigate; do not overwrite changed managed files to hide it.
-Use `mirket project add/remove` to change selections, then inspect the plan,
-sync with `--prune` and review the diff. Keep only expertise justified by an
-existing project boundary. Do not add competing rule directories, skill
-installers, repository MCP servers or model pins.
-
-## Execution and evidence
-
-Select guidance from the deliverable and affected boundary. Read the relevant
-skill and only useful references; use `skill-catalog` when discovery is needed.
-The catalog is advisory, not exhaustive. User choices, project requirements,
-source rights and host permissions govern tool use and external effects.
-
-Handle routine work directly. When continuity, recovery or coordination needs
-durable state, reuse a sufficient existing record or use Mirket task tools;
-retain decisions, source pointers, acceptance evidence and a meaningful failure
-probe. Do not create a parallel tracker or require task ceremony for every edit.
-With the optional agent runtime selected, use focused Mem0 recall for prior
-project decisions and store only verified stable facts with provenance and
-supersession. Mirket-owned workers use LangGraph checkpoints; inspect and resume
-their original workflow after an interruption. Native host sessions retain
-their own lifecycle. Do not infer memory correctness from package readiness.
-
-Delegate only when independent work materially helps or it is requested. For
-Mirket-owned workers, read `agent-coordination/references/model-routing.md`
-through `skill_read`, inspect `capability_plan`, discover `model_registry`, and
-preview `route_task`. Declare only actual deliverables in `task_needs`; use
-`spawn_subagent` with bounded briefs, disjoint ownership and the resolved tool
-scope. Read the resolved guidance and verification contract and integrate the
-actual output. Native host tools and native subagents remain host-owned;
-Mirket does not intercept them or grant additional permissions.
-
-Design work follows image-to-code. Read the installed `interface-design`
-`references/image-to-code.md` contract. Inspect a supplied target or create a minimal native specimen suited to the
-medium; use the host image model when raster composition helps the deliverable.
-Render and inspect the target, then freeze it before expansion. Retain the target, provenance
-and viewport/state so comparisons are reproducible. Gate composition, typography,
-assets, responsive layout, behavior and requested motion against the frozen
-target; a still image cannot prove animation. Inspect normal-motion frames and
-reduced-motion behavior. Use the installed medium-specific production budgets and report unresolved
-defects at the limit. Do not restart sample campaigns to reset the budget. Use the project's application gates below
-for implementation evidence; tool readiness and screenshots alone are not
-acceptance.
-
-For Mirket design production, use the single `design` package's reported
-workspace. Route
-live UI to browser inspection, editable designs to OpenPencil, diagrams to
-Kroki (select Excalidraw explicitly only when needed), paged work to Typst,
-vectors to SVG/resvg, SVG hygiene to SVGO, raster preparation to Sharp, static
-Flexbox graphics to Satori/resvg and comparable pixels to Odiff. Encoded video
-requires separately selected host tooling. Inspect saved outputs.
-Compile Style Dictionary tokens for dependent production and reference their outputs in authored
-source. Observational captures and saved-file exports preserve existing sources
-without injecting or requiring tokens. Odiff reports completed comparisons and
-whether pixels match separately; request `expect_match: true` when equality is
-an acceptance requirement. Inspect applicable design axes and record why any
-axis is irrelevant; keep all affected application gates.
-
-Package installation, runtime readiness, invocation and useful output are
-separate facts; use native project tools for application verification.
-
-Before delivery, run the affected application gates below and `pnpm agents:check`.
-That harness gate runs the installed doctor plus real missing/tampered-skill
-probes for both targets. CI provisions a digest-verified published Linux CLI
-and checks committed files without synchronizing them first. A green doctor
-does not prove desktop activation, authenticated worker execution or application
-correctness. Call `runtime_status` in each actual desktop connection and compare its binary,
-source and catalog hashes with the reviewed pin. Require
-`installed_binary.matches_process: true`; CLI doctor does not prove activation.
-See `docs/harness.md` for current release maintenance and verification boundaries.
-
-Keep secrets, local host configuration, task/runtime caches and the transient
-`.mirket/project.lock` mutex out of commits. Preserve unrelated work. Commits,
-pushes, releases, external messages and production changes need user authority;
-a role, registration or passing test does not supply it.
-
-## Application gates
-
-Use Node.js 24 and pnpm 9.15.9 as declared in the package manifests and `.nvmrc`.
+Use Node 24 and pnpm 9.15.9, as declared in the manifests and `.nvmrc`:
 
 ```sh
 corepack pnpm@9.15.9 install --frozen-lockfile --ignore-scripts
 corepack pnpm@9.15.9 verify
 corepack pnpm@9.15.9 --dir demo install --frozen-lockfile
 corepack pnpm@9.15.9 --dir demo verify
+npm pack --dry-run --ignore-scripts
 ```
 
-The root verification includes lint, build, QR regression tests and public type
-checks. Build the root package before installing the demo's file dependency.
-Inspect the rendered demo for interface changes; build success alone cannot
-prove canvas, download or interaction behavior.
-
-Use Podman and the installed Compose provider for disposable container checks:
-
-```sh
-podman compose -f compose.yml config --quiet
-COOLQR_PORT=9492 podman compose -p coolqr-validation up -d --build
-curl --fail http://127.0.0.1:9492/
-podman compose -p coolqr-validation down
-```
-
-Choose an unused loopback port and project name. Keep package publishing
-(`pnpm release`) separate from validation; run it only when authorized.
+The root gate lints, builds, tests QR behavior and checks a public TypeScript
+consumer. The demo gate lints, typechecks and builds. Inspect the real rendered
+journey for UI changes, decoded output for rendering changes, and the failure
+boundary for either. For container changes, use an authorized disposable Compose
+project and an unused loopback port; validate configuration, HTTP behavior and
+cleanup without touching production. State skipped or unavailable checks and
+never claim live browser, scanner, deployment or host-startup coverage from a
+source or test result alone.

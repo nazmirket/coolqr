@@ -26,7 +26,8 @@ logs
 # Package artifacts
 *.tgz
 
-# Local agent state (managed project skills remain versioned)
-.mirket/project.lock
-.claude/settings.local.json
+# Agent runtime state is local; no repository-managed agent configuration.
+.mirket/
+.claude/
 .codex/
+.agents/

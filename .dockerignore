@@ -14,5 +14,3 @@ demo/node_modules
 .claude
 .mirket
 AGENTS.md
-CLAUDE.md
-scripts/harness.node.mjs

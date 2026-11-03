@@ -24,13 +24,11 @@ Known safe failure: A 1,000-character alphanumeric payload at ECC H cannot fit a
 - Browser UI: the Portfolio example reset the full design to Moss palette, connected rounded marks, diamond finder centers and linear ink, and its canvas decoded. Desktop and 390px mobile views were inspected; mobile document scroll width equaled the viewport width.
 - Podman Compose canary: built the current source, served HTTP 200 on loopback port 9492, then was removed.
 
-## Mirket 1.0.11 adoption — 2026-10-20
+## Historical agent tooling — 2026-10-20
 
-See [the migration record](mirket-migration.md) for the adoption matrix, exact
-release/live identity, application gates, failure/restoration probes, package
-invocation and remaining Claude live activation gap. Historical browser
-and scanner checks above remain dated evidence, not claims of a new visual run.
-
+The former Codex/Claude Mirket harness ran alongside the product checks reported
+below. Its dual-host registration and release pin were retired in the later
+Pi Durable migration. These are dated observations, not current setup steps.
 
 ## Library review and logo/contour changes — 2026-10-20
 
@@ -84,13 +82,10 @@ loading, logo placement, demo controls and package contents.
 - Disposable Podman Compose build on loopback port 9497 returned HTTP 200 and
   supported the same upload/download browser journey. The test container is removed
   after validation. No publishing or deployment was performed.
-- Harness check passed at entry. A later default-PATH run found an unreviewed
-  same-version Cargo binary (`444f9f22…`) ahead of the reviewed installed binary
-  (`14a03254…`). The repository pin and managed guidance were left intact.
-  Run with `PATH="$HOME/.mirket/bin:$PATH" pnpm agents:check` to use the digest-verified
-  installed release; all 11 harness checks passed with that PATH. The live Codex MCP connection matched the reviewed binary,
-  source and catalog with `installed_binary.matches_process: true`; no Claude
-  desktop connection was available to inspect.
+- The then-current harness check passed after selecting its reviewed executable;
+  an unreviewed same-version binary on the default PATH was rejected. The
+  historical Codex connection was observed; Claude activation was unverified.
+  This is not a current launcher or verification instruction.
 
 ### Reproducing the supplemental checks
 
@@ -292,7 +287,8 @@ Corepack still requests exact pnpm 9.15.9; a separate manager-artifact pin was
 conditional advice, not a demonstrated defect.
 
 - Root install/verification passed 18 tests and public type checks. Demo install,
-  lint, typecheck and build passed. `pnpm agents:check` passed all 11 checks;
+  lint, typecheck and build passed. The then-current dual-host harness passed
+  its 11 checks; this is historical evidence, not a current command.
   `npm pack --dry-run --ignore-scripts` contained 16 package files.
 - [Application CI](https://github.com/nazmirket/coolqr/actions/runs/39832467685)
   and [Mirket CI](https://github.com/nazmirket/coolqr/actions/runs/39832467752)
