@@ -204,12 +204,6 @@ The production host can use a different Compose provider. Set `COOLQR_PORT` and 
 
 Use [GitHub Issues](https://github.com/nazmirket/coolqr/issues) for bugs and feature proposals. For rendering problems, include the input text, render options, browser, and scanner behavior. Remove private data before sharing a reproduction.
 
-### Agent development
-
-[AGENTS.md](AGENTS.md) is the single repository-specific guide for the installed
-Mirket Pi Durable host. It names product boundaries and verification gates;
-general skills and authorized tools are supplied by the selected host, not
-project-managed Codex/Claude copies or a pinned CLI. The application CI tests
-the root package before installing the demo's local dependency. Historical
-product checks and deployment recovery are recorded in
-[verification evidence](docs/verification.md); those observations are dated.
+See the [contributor guide](AGENTS.md) for product boundaries, required checks and
+release procedures. Previous product checks and deployment recovery steps are
+recorded in [verification evidence](docs/verification.md).

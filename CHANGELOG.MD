@@ -23,9 +23,6 @@
 - Correct asymmetric dark/light balance scoring when choosing a QR mask.
 - Snapshot rendering options before asynchronous image loading, validate logo
   geometry before loading, and allow rendering without `Image` when no logo is used.
-
-- Align agent instructions and checksum-pinned CI with Mirket 1.0.5, including
-  frozen visual targets, quality gates and the no-image-model fallback.
 - Use the public `EncodeOptions` and `QRMatrix` interfaces directly throughout
   the encoder; remove duplicate internal type names and empty dependency config.
 

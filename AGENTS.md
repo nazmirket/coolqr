@@ -1,13 +1,4 @@
-# CoolQR — Mirket project guidance
-
-Use the installed Mirket Pi Durable host for agentic work in this repository.
-This file is the sole repository-specific agent guidance; there are no
-Codex/Claude skill copies, client registrations, release pins or repository MCP
-servers. The host's selected skills, local tools and explicitly configured MCP
-tools provide general methods. Do not discover or execute an ambient agent binary,
-install an agent, change account-wide settings, or bind an unverified executable.
-An installed launcher bound to another project is not proof of a CoolQR startup;
-report that gap rather than rewriting a user-wide launcher from this repository.
+# CoolQR contributor guide
 
 ## Product boundaries
 
@@ -27,21 +18,9 @@ report that gap rather than rewriting a user-wide launcher from this repository.
   substitute for testing a changed rendering path.
 - The demo's asynchronous render sequence keeps old results from replacing new
   previews. Verify out-of-order completion when changing that lifecycle.
-- `compose.yml` binds the demo to loopback by default. Deployment, publishing and
-  third-party effects are separate from local verification and require the user's
-  scope and an observed recovery path; preserve the historical rollback evidence
-  in `docs/verification.md`.
+- `compose.yml` binds the demo to loopback by default.
 
 ## Work and verification
-
-Inspect Git status, affected owners and the selected Pi Durable capability before
-editing. Keep source and project state in the repository; use the host's selected
-skills for debugging, frontend, infrastructure, testing, accessibility, design,
-search and release work when applicable. Use only installed, verified local
-executables and MCP routes explicitly selected in this host. MCP availability in
-a tool list does not prove a peer is connected. Keep generated previews and
-fixtures within authorized project paths. Preserve unrelated changes and private
-state; never run an installer or overwrite a conflicting file to make a check pass.
 
 Use Node 24 and pnpm 9.15.9, as declared in the manifests and `.nvmrc`:
 
@@ -59,5 +38,14 @@ journey for UI changes, decoded output for rendering changes, and the failure
 boundary for either. For container changes, use an authorized disposable Compose
 project and an unused loopback port; validate configuration, HTTP behavior and
 cleanup without touching production. State skipped or unavailable checks and
-never claim live browser, scanner, deployment or host-startup coverage from a
-source or test result alone.
+report browser, scanner and deployment results only when directly verified.
+
+## Releases
+
+Run the application checks above and inspect the package contents before an npm
+release. `npm run release` publishes the library and runs root verification through
+`prepublishOnly`. For a website rollout, verify the candidate image and rehearse
+rollback in an isolated Compose project before promotion. Keep publishing and
+production deployment separately authorized from local verification. See
+`docs/verification.md` for previous package integrity checks, rollout procedures
+and rollback commands.

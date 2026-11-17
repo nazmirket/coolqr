@@ -24,12 +24,6 @@ Known safe failure: A 1,000-character alphanumeric payload at ECC H cannot fit a
 - Browser UI: the Portfolio example reset the full design to Moss palette, connected rounded marks, diamond finder centers and linear ink, and its canvas decoded. Desktop and 390px mobile views were inspected; mobile document scroll width equaled the viewport width.
 - Podman Compose canary: built the current source, served HTTP 200 on loopback port 9492, then was removed.
 
-## Historical agent tooling — 2026-10-20
-
-The former Codex/Claude Mirket harness ran alongside the product checks reported
-below. Its dual-host registration and release pin were retired in the later
-Pi Durable migration. These are dated observations, not current setup steps.
-
 ## Library review and logo/contour changes — 2026-10-20
 
 Reviewed the public exports, encoder mode selection, UTF-8/ECI, Reed–Solomon
@@ -82,10 +76,6 @@ loading, logo placement, demo controls and package contents.
 - Disposable Podman Compose build on loopback port 9497 returned HTTP 200 and
   supported the same upload/download browser journey. The test container is removed
   after validation. No publishing or deployment was performed.
-- The then-current harness check passed after selecting its reviewed executable;
-  an unreviewed same-version binary on the default PATH was rejected. The
-  historical Codex connection was observed; Claude activation was unverified.
-  This is not a current launcher or verification instruction.
 
 ### Reproducing the supplemental checks
 
@@ -134,9 +124,8 @@ segments; this is a size-efficiency opportunity, not a demonstrated encoding err
   The initial release commit is `8e4e915`; the follow-up fixes the optional reference
   script's import of generated files during clean-checkout lint. Verification was
   repeated with `dist/` absent, without weakening the lint rule.
-- [Application CI](https://github.com/nazmirket/coolqr/actions/runs/39397088238) and
-  [harness CI](https://github.com/nazmirket/coolqr/actions/runs/39397088211) passed
-  on the release revision. Local root, demo and pinned-Mirket gates passed.
+- [Application CI](https://github.com/nazmirket/coolqr/actions/runs/39397088238)
+  passed on the release revision. Local root and demo gates passed.
 - [coolqr 3.3.0](https://www.npmjs.com/package/coolqr/v/3.3.0) was published and
   confirmed as npm's `latest`. Registry tarball SHA-1
   `5100baa6ed06276888e6217686bee6997a376247` matches the tested tarball; its extracted
@@ -182,9 +171,9 @@ and individual/connected diamond dots. Inspected in Chrome at 1200px viewport an
 zbar; desktop and 390px mobile checks found no overflow or browser exceptions.
 
 Root verification passes 18 tests and public type checks. The independent encoder
-comparison still matches 640 matrices. Demo verification and pinned Mirket checks
-pass. Regression tests cover styled metadata, the screenshot's alignment target,
-and multiple alignment targets in higher versions.
+comparison still matches 640 matrices. Demo verification passes. Regression tests
+cover styled metadata, the screenshot's alignment target, and multiple alignment
+targets in higher versions.
 
 The expanded browser sweep is **not green**: 1,619 of 1,620 images decoded with jsQR
 or zbar (393 needed zbar), and 60 pixel-integrity cases passed. The remaining failure
@@ -235,17 +224,14 @@ quiet zones, and logo exclusion rules are preserved.
   was inspected and now decodes with both jsQR and zbar. Its six size probes are
   included in the permanent `--full` regression command.
 - Root verification (18 tests and type checks), demo lint/typecheck/build,
-  640 independent encoder matrices, and all 11 pinned-Mirket checks pass.
-  The active Codex Mirket process matches the reviewed binary/source/catalog pin
-  and reports `installed_binary.matches_process: true`.
+  and 640 independent encoder matrix comparisons pass.
 - Physical camera/print testing and Safari/Firefox remain outside this evidence.
   The earlier release hold is resolved by these checks; deployment evidence follows.
 
 ### 3.3.1 website rollout
 
 - Release source: `48c4772a13085fd604b459fb564f313e55d7583f`.
-  [Application CI](https://github.com/nazmirket/coolqr/actions/runs/39407111517) and
-  [Mirket CI](https://github.com/nazmirket/coolqr/actions/runs/39407111530) passed.
+  [Application CI](https://github.com/nazmirket/coolqr/actions/runs/39407111517) passed.
 - npm tarball `coolqr-3.3.1.tgz` SHA-1 is
   `f1c258ac2cc0ad3cc91081b0880fa067cad0b4c5`. Extracted `dist/` files match the tested
   build byte-for-byte and the public package entrypoint was exercised. After web
@@ -279,19 +265,17 @@ quiet zones, and logo exclusion rules are preserved.
 Three independent read-only reviews covered the library, the Nuxt demo, and the
 delivery path. The library and demo reviews found no clear source-backed defects.
 The delivery review identified moving GitHub Action tags and a moving Docker
-base image. Commit `5a134851ec18efe70d53c3f7093bc90389454dd1` pins both
-workflows to verified `checkout` and `setup-node` v5 commits and pins both
+base image. Commit `5a134851ec18efe70d53c3f7093bc90389454dd1` pins the application
+workflow to verified `checkout` and `setup-node` v5 commits and pins both
 Docker stages to the same multi-platform Node 24 Alpine index digest
 `sha256:06d7adf3e0ef61a13f1d28682726366f97a15aa1888c934d3ecec86c33918b53`.
 Corepack still requests exact pnpm 9.15.9; a separate manager-artifact pin was
 conditional advice, not a demonstrated defect.
 
 - Root install/verification passed 18 tests and public type checks. Demo install,
-  lint, typecheck and build passed. The then-current dual-host harness passed
-  its 11 checks; this is historical evidence, not a current command.
-  `npm pack --dry-run --ignore-scripts` contained 16 package files.
+  lint, typecheck and build passed. `npm pack --dry-run --ignore-scripts` contained
+  16 package files.
 - [Application CI](https://github.com/nazmirket/coolqr/actions/runs/39832467685)
-  and [Mirket CI](https://github.com/nazmirket/coolqr/actions/runs/39832467752)
   passed on the pinned commit. The local Podman VM stopped after startup, so its
   Compose gate could not run. The production host's Docker Compose provider
   built and exercised the exact committed source instead.

@@ -25,9 +25,3 @@ logs
 
 # Package artifacts
 *.tgz
-
-# Agent runtime state is local; no repository-managed agent configuration.
-.mirket/
-.claude/
-.codex/
-.agents/
