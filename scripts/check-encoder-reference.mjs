@@ -7,7 +7,7 @@ import ts from 'typescript'
 const { encodeQR } = await import(new URL('../dist/index.js', import.meta.url).href)
 
 // External reference stays outside the production package and dependency graph.
-// See docs/verification.md for the reviewed source and its provenance.
+// See docs/Verification.md for the reviewed source and its provenance.
 const referencePath = process.env.COOLQR_ENCODER_REFERENCE
 if (!referencePath)
 	throw new Error('Set COOLQR_ENCODER_REFERENCE to the reviewed qrcodegen.ts')

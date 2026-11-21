@@ -1,5 +1,6 @@
 .git
 .github
+.work
 .DS_Store
 node_modules
 dist

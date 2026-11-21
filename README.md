@@ -44,7 +44,7 @@ Install the published package from npm:
 npm install coolqr
 ```
 
-This guide describes the API in CoolQR 3.3.1. See the [changelog](CHANGELOG.MD) for release history.
+This guide describes the API in CoolQR 3.3.1. See the [changelog](Changelog.md) for release history.
 
 Use the named `encodeQR` and `renderQR` functions below. The package entry point is CommonJS with TypeScript declarations; bundlers can consume it in browser applications. `encodeQR` works in Node.js. `renderQR` needs a browser with Canvas 2D.
 
@@ -169,32 +169,8 @@ try {
 
 ## Develop and verify
 
-The library lives in `src/` and compiles to `dist/`. The public site is a separate Nuxt project in `demo/`, with a local file dependency on the package. Use Node.js 24 (`nvm use`) and pnpm 9.15.9. The root development contract and demo engine requirement record Node 24; both manifests pin pnpm. From a fresh checkout:
-
-```sh
-git clone https://github.com/nazmirket/coolqr.git
-cd coolqr
-corepack pnpm@9.15.9 install --frozen-lockfile --ignore-scripts
-corepack pnpm@9.15.9 run verify
-
-corepack pnpm@9.15.9 --dir demo install --frozen-lockfile
-corepack pnpm@9.15.9 --dir demo run verify
-corepack pnpm@9.15.9 --dir demo run dev
-```
-
-The package gate lints, builds, runs encoder and entry-point tests, and checks a TypeScript consumer. The demo gate lints, type-checks, and builds. To inspect what users would install, run `npm pack --dry-run` after the package build. No runtime third-party packages are required by `coolqr`.
-
-### Run the demo container locally
-
-Use Podman with a Compose provider. The service binds to loopback; choose a free port when running a disposable copy:
-
-```sh
-COOLQR_PORT=9492 podman compose -p coolqr-validation up -d --build
-curl --fail http://127.0.0.1:9492/
-podman compose -p coolqr-validation down
-```
-
-The production host can use a different Compose provider. Set `COOLQR_PORT` and `COOLQR_IMAGE_TAG` as needed; see `compose.yml`.
+Use the local development guide to build the library, run the Nuxt demo, or
+validate the container in OrbStack. [Local development guide](https://github.com/nazmirket/coolqr/blob/master/docs/Development.md)
 
 ## License
 
@@ -204,6 +180,6 @@ The production host can use a different Compose provider. Set `COOLQR_PORT` and 
 
 Use [GitHub Issues](https://github.com/nazmirket/coolqr/issues) for bugs and feature proposals. For rendering problems, include the input text, render options, browser, and scanner behavior. Remove private data before sharing a reproduction.
 
-See the [contributor guide](AGENTS.md) for product boundaries, required checks and
-release procedures. Previous product checks and deployment recovery steps are
-recorded in [verification evidence](docs/verification.md).
+The contributor guide covers product boundaries and release rules. The
+verification log records previous product checks and deployment recovery steps.
+[Contributor guide](https://github.com/nazmirket/coolqr/blob/master/AGENTS.md) · [Verification log](https://github.com/nazmirket/coolqr/blob/master/docs/Verification.md)

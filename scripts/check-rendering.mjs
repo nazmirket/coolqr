@@ -2,7 +2,6 @@ import fs from 'node:fs'
 import { createRequire } from 'node:module'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
-import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import assert from 'node:assert/strict'
 
@@ -14,13 +13,16 @@ const root = process.cwd()
 const source = name => fs.readFileSync(`${root}/dist/${name}.js`, 'utf8')
 const bundle = `const penalty={};((exports)=>{${source('encoder/penalty')}})(penalty);const encoder={};((exports,require)=>{${source('encoder/index')}})(encoder,()=>penalty);const logo={};((exports)=>{${source('logo')}})(logo);const renderer={};((exports,require)=>{${source('Render')}})(renderer,name=>name==='./logo'?logo:encoder);window.qr={...encoder,...renderer};`
 ;(async () => {
-	const browser = await chromium.launch({
-		executablePath: process.env.COOLQR_BROWSER_PATH,
-		headless: true,
-	})
-	const scratch = fs.mkdtempSync(join(tmpdir(), 'coolqr-scan-'))
+	const output = join(root, '.work', 'temp', 'check-rendering')
+	fs.mkdirSync(output, { recursive: true })
+	const scratch = fs.mkdtempSync(join(output, 'run-'))
+	let browser
 	let imageNumber = 0
 	try {
+		browser = await chromium.launch({
+			executablePath: process.env.COOLQR_BROWSER_PATH,
+			headless: true,
+		})
 		const page = await browser.newPage()
 		await page.exposeFunction('decodeFallback', async (dataUrl, expected) => {
 			if (!process.env.COOLQR_ZBAR_PATH) return false
@@ -205,7 +207,10 @@ const bundle = `const penalty={};((exports)=>{${source('encoder/penalty')}})(pen
 		process.stdout.write(JSON.stringify(result, null, 2) + '\n')
 		assert.equal(result.failures.length, 0)
 	} finally {
-		await browser.close()
-		fs.rmSync(scratch, { recursive: true, force: true })
+		try {
+			await browser?.close()
+		} finally {
+			fs.rmSync(scratch, { recursive: true, force: true })
+		}
 	}
 })()

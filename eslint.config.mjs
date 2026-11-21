@@ -8,7 +8,17 @@ import globals from 'globals'
 
 export default [
 	{
-		ignores: ['node_modules/**', 'dist/**', 'demo/**', 'resources/**', 'public/**'],
+		ignores: [
+			'node_modules/**',
+			'dist/**',
+			'demo/**',
+			'resources/**',
+			'public/**',
+			'.work/temp/**',
+			'.work/recover/**',
+			'.work/stashes/**',
+			'.work/routines/**',
+		],
 	},
 	eslint.configs.recommended,
 	...typescriptEslint.configs['flat/recommended'],

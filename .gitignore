@@ -25,3 +25,9 @@ logs
 
 # Package artifacts
 *.tgz
+
+# Local workspace files
+/.work/temp/
+/.work/recover/
+/.work/stashes/
+/.work/routines/

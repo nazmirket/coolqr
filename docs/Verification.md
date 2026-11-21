@@ -32,19 +32,13 @@ loading, logo placement, demo controls and package contents.
 
 ### Findings and changes
 
-- The default white logo badge obscured data and clashed with nonwhite backgrounds.
-  `src/logo.ts` now rasterizes the image once, measures alpha occupancy, and removes
-  whole intersecting data modules before rendering. Padding is applied around
-  occupied pixels. Transparent holes and unrelated dots remain; wide/tall images
-  retain aspect ratio. Explicit `logo.background` opts into a rectangular badge.
-  Function modules remain protected. Placement uses the nearest safe rectangle;
-  dense symbols can still require a smaller logo or less padding.
-- Rectangular bridges produced knotted circles and polygons. Connected rendering
-  now shapes exposed cluster corners with flush shared edges. Four additions bring
-  the catalog to ten: squircle, leaf, horizontal and vertical.
-- Applying isolated decorative shapes to scanner landmarks caused decoding failures
-  in URL, Unicode and numeric cases. Timing, alignment, format and version modules
-  now retain square geometry and solid foreground ink. Finder styles remain separate.
+- [Alpha-based logo clearance](../.work/decisions/0001-AlphaBasedLogoClearance.md)
+  replaced the default white badge.
+- [Connected cluster contours](../.work/decisions/0005-ConnectedClusterContours.md)
+  replaced rectangular bridges. Four additions bring the catalog to ten:
+  squircle, leaf, horizontal and vertical.
+- [Square function marks](../.work/decisions/0002-SquareFunctionMarks.md)
+  were used for this release. The 3.3.1 release superseded that decision.
 - Mask balance scoring used asymmetric rounding: equivalent light/dark departures
   from 50% received different penalties. The corrected symmetric score has an
   inversion regression test. Encoded masks can change for affected payloads.
@@ -79,8 +73,10 @@ loading, logo placement, demo controls and package contents.
 
 ### Reproducing the supplemental checks
 
-The optional scripts use externally supplied verification tools; no runtime or
-production dependencies were added. Build the root package first.
+The optional scripts use externally supplied verification tools. Build the
+root package first and run both commands from the repository root. The
+rendering check writes temporary scan images under `.work/temp/check-rendering/`
+and removes each run directory after use.
 
 ```sh
 COOLQR_PLAYWRIGHT_MODULE=/path/to/playwright \
@@ -92,7 +88,7 @@ COOLQR_ENCODER_REFERENCE=/path/to/qrcodegen.ts \
 node scripts/check-encoder-reference.mjs
 ```
 
-Reference encoder: [Nayuki TypeScript source](https://raw.githubusercontent.com/nayuki/QR-Code-generator/master/typescript-javascript/qrcodegen.ts),
+Reference encoder: [Nayuki TypeScript source](https://raw.githubusercontent.com/nayuki/QR-Code-generator/8329a7108fc22be3e1eec0a9f9318978579e3621/typescript-javascript/qrcodegen.ts),
 retrieved 2026-10-20, SHA-256
 `1dc03fb5a10e0e2318ea162755bbdb9977ca6ce52cff959e9c9b6deafdccda9c`.
 The comparison script checks this digest before evaluating it. Decoder:
@@ -157,31 +153,10 @@ segments; this is a size-efficiency opportunity, not a demonstrated encoding err
 
 ## Style-consistency correction — unreleased, 2026-10-20
 
-The user's screenshot exposed a regression in 3.3.0: forcing function modules to
-solid squares visibly contradicted the selected diamond style. Timing and metadata
-modules now follow the selected dot style and ink. Alignment targets retain their
-continuous ring structure but use the same frame, center, and colors as finder eyes.
-Mixed frame/center proportions are balanced, and horizontal capsules have slightly
-stronger strokes. The encoded matrix and logo exclusion rules are unchanged.
-
-[Corrected native canvases](images/rendering-review/style-consistency.png) reproduce
-`https://example.com/portfolio` with the Indigo colors, circular frames and centers,
-and individual/connected diamond dots. Inspected in Chrome at 1200px viewport and
-2× device scale. Both actual demo PNG downloads decoded to the exact payload using
-zbar; desktop and 390px mobile checks found no overflow or browser exceptions.
-
-Root verification passes 18 tests and public type checks. The independent encoder
-comparison still matches 640 matrices. Demo verification passes. Regression tests
-cover styled metadata, the screenshot's alignment target, and multiple alignment
-targets in higher versions.
-
-The expanded browser sweep is **not green**: 1,619 of 1,620 images decoded with jsQR
-or zbar (393 needed zbar), and 60 pixel-integrity cases passed. The remaining failure
-uses a dense URL at 320px, connected horizontal dots, circular frames and square
-centers. [Exact result and reproduction options](images/rendering-review/style-decoder-results.json)
-are retained. A smaller square-center experiment added two failures and was reverted.
-This is a demonstrated scan limitation, not proof of universal scanner compatibility.
-Physical cameras, printing, Safari and Firefox remain untested.
+The initial correction and release hold are recorded in the
+[3.3.1 starting evidence](../.work/plans/0001-CoolQR-3.3.1-Release/Evidences.md).
+See the [styled function marks decision](../.work/decisions/0003-StyledFunctionMarks.md)
+for the rendering rule.
 
 Reproduce the strict sweep after building the root package:
 
@@ -193,84 +168,23 @@ COOLQR_ZBAR_PATH=/path/to/zbarimg \
 node scripts/check-rendering.mjs --full
 ```
 
-The command deliberately exits nonzero while any case fails; its threshold was not
-relaxed. The visual repair budget is exhausted. Publication and production deployment
-are held pending resolution of this failure. npm and the website remain on 3.3.0;
-no 3.3.1 release or tag was created.
+The command exits nonzero when any case fails.
 
 ## 3.3.1 release validation — 2026-10-20
 
-The user authorized a further repair and release after the held pass above.
-The remaining failure was a small-pixel horizontal stroke problem: the dense
-53-module symbol decoded at 319px and 321px but failed at 320px. An equal-integer
-module grid fixed that case but introduced ten logo-case failures, so it was
-rejected. Making all horizontal strokes heavier passed the catalog but regressed
-an additional 512px size probe. The accepted correction strengthens horizontal
-strokes only when their module is smaller than six pixels; larger strokes retain
-the tested proportions. Canvas dimensions, encoded matrices, selected silhouettes,
-quiet zones, and logo exclusion rules are preserved.
-
-- The strict expanded sweep now passes **1,626/1,626** images: all ten dot styles,
-  both layouts, all three finder frames and four centers, representative URL,
-  Unicode and dense payloads, 320/512px outputs, four ink patterns, and logo/no-logo
-  cases, plus six focused size probes (319, 320, 321, 328, 384, 512px).
-  Patterns and logo presence are distributed across the cross-style cases;
-  this is not an exhaustive test of every payload or every option permutation.
-- 392 images needed the independent zbar fallback after jsQR. Both decoders must
-  return the exact payload to count a case as passing; no failed cases are skipped.
-  60 pixel-integrity checks and the transparent-logo equality check also pass.
-  [Machine-readable result](images/rendering-review/style-release-results.json).
-- [Previously failing 320px output](images/rendering-review/dense-horizontal.png)
-  was inspected and now decodes with both jsQR and zbar. Its six size probes are
-  included in the permanent `--full` regression command.
-- Root verification (18 tests and type checks), demo lint/typecheck/build,
-  and 640 independent encoder matrix comparisons pass.
-- Physical camera/print testing and Safari/Firefox remain outside this evidence.
-  The earlier release hold is resolved by these checks; deployment evidence follows.
+See the [3.3.1 results](../.work/plans/0001-CoolQR-3.3.1-Release/Progress.md)
+for the accepted correction, decoded sweep, and limits.
 
 ### 3.3.1 website rollout
 
-- Release source: `48c4772a13085fd604b459fb564f313e55d7583f`.
-  [Application CI](https://github.com/nazmirket/coolqr/actions/runs/39407111517) passed.
-- npm tarball `coolqr-3.3.1.tgz` SHA-1 is
-  `f1c258ac2cc0ad3cc91081b0880fa067cad0b4c5`. Extracted `dist/` files match the tested
-  build byte-for-byte and the public package entrypoint was exercised. After web
-  authentication, npm publication completed successfully. Registry version 3.3.1
-  and the `latest` tag are confirmed; both registry SHA-1 and SHA-512 integrity
-  match the tested tarball. Tag `v3.3.1` identifies the release source above.
-- Source archive SHA-256:
-  `df3940206da4109bda441fec651307e4831495aa50bf3691e599f489439e8fe8`.
-  Server image `coolqr-demo:48c4772`:
-  `sha256:08b75569689fc5e03fd59f019aefe2f434cba0337ff941d2276ec5ba5097ae7f`.
-- The isolated canary passed 20 real UI downloads (all ten styles in each layout),
-  with exact PNG equality against the tested library and exact payload decoding.
-  Transparent-logo upload/download, desktop and 390px mobile checks passed without
-  browser exceptions or horizontal overflow. The new output-equality guard
-  rejected the old production rendering before promotion.
-- Restored the prior image on the canary, verified its identity and HTTP health,
-  then restored the candidate and verified its identity again. Promoted that same
-  candidate image at **2026-10-20T10:22:37Z**. Nginx and the production port are unchanged.
-- The public HTTPS site passed all 20 download comparisons and decoding checks.
-  Production reports `healthy`; `/opt/coolqr/current` and `.deploy-commit` identify
-  the new release. The disposable canary was removed.
-- Rollback remains available in `/opt/coolqr/releases/06b2947` using image
-  `coolqr-demo:06b2947` (immutable identity
-  `sha256:677af2ab3fe42c466eff3b84dbab065b2a1e9a164b9097521acdc21bd570151b`).
-  Run `COOLQR_PORT=9491 COOLQR_IMAGE_TAG=06b2947 docker compose -p coolqr up -d --no-build`
-  there, verify the page/download, and restore the `current` symlink and
-  `.deploy-commit` to `06b29471d55f72081a2f25a0c781c8436fdf3bdb` if recovery is needed.
+The canary, publication, promotion, and rollback evidence is in the
+[website rollout record](../.work/plans/0001-CoolQR-3.3.1-Release/Progress.md#website-rollout).
 
 ## Independent review and deployment pinning — 2026-10-22
 
 Three independent read-only reviews covered the library, the Nuxt demo, and the
 delivery path. The library and demo reviews found no clear source-backed defects.
-The delivery review identified moving GitHub Action tags and a moving Docker
-base image. Commit `5a134851ec18efe70d53c3f7093bc90389454dd1` pins the application
-workflow to verified `checkout` and `setup-node` v5 commits and pins both
-Docker stages to the same multi-platform Node 24 Alpine index digest
-`sha256:06d7adf3e0ef61a13f1d28682726366f97a15aa1888c934d3ecec86c33918b53`.
-Corepack still requests exact pnpm 9.15.9; a separate manager-artifact pin was
-conditional advice, not a demonstrated defect.
+The delivery review led to the [build input pins](../.work/decisions/0004-PinnedBuildInputs.md).
 
 - Root install/verification passed 18 tests and public type checks. Demo install,
   lint, typecheck and build passed. `npm pack --dry-run --ignore-scripts` contained
